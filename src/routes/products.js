@@ -36,6 +36,47 @@ app.get('/', (req, res) => {
     });
 });
 
+app.get('/navbar/all', (req, res) => {
+  let productsList = [];
+  Product.find()
+    .limit(18)
+    .then((products) => {
+      products.map((product) => {
+        productsList.push({
+          slug: product.slug,
+          productName: product.productName,
+        });
+      });
+      res.json(productsList);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+app.get('/navbar/category/:category', (req, res) => {
+  const { category } = req.params;
+  console.log('tested category:', category);
+  let productsList = [];
+  Product.find({
+    'organization.category': category,
+  })
+    .limit(18)
+    .then((products) => {
+      console.log('products category:', products);
+      products.map((product) => {
+        productsList.push({
+          slug: product.slug,
+          productName: product.productName,
+        });
+      });
+      res.json(productsList);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
 app.get('/get/product/:slug', (req, res) => {
   const { slug } = req.params;
   console.log('slug product:', slug);

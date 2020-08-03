@@ -41,6 +41,45 @@ app.get('/', (req, res) => {
     });
 });
 
+app.get('/navbar/all', (req, res) => {
+  let bundlesList = [];
+  Bundle.find()
+    .limit(18)
+    .then((bundles) => {
+      bundles.map((bundle) => {
+        bundlesList.push({
+          slug: bundle.slug,
+          bundleName: bundle.bundleName,
+        });
+      });
+      res.json(bundlesList);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+app.get('/navbar/category/:category', (req, res) => {
+  const { category } = req.params;
+  let bundlesList = [];
+  Bundle.find({
+    'organization.category': category,
+  })
+    .limit(18)
+    .then((bundles) => {
+      bundles.map((bundle) => {
+        bundlesList.push({
+          slug: bundle.slug,
+          bundleName: bundle.bundleName,
+        });
+      });
+      res.json(bundlesList);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
 app.get('/get/bundle/:slug', (req, res) => {
   const { slug } = req.params;
   console.log('slug product:', slug);
