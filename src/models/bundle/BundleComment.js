@@ -22,6 +22,10 @@ const BundleCommentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  stars: {
+    type: Number,
+    required: true,
+  },
   likes: {
     type: Number,
     required: false,

@@ -17,7 +17,7 @@ const User = require('../../models/user/User');
 const UserProfileImage = require('../../models/user/UserProfileImage');
 
 app.post('/comment/post', async (req, res) => {
-  const { productId, userId, content } = req.body;
+  const { productId, userId, content, stars } = req.body;
 
   console.log('productId:', productId);
   console.log('userId:', userId);
@@ -47,6 +47,7 @@ app.post('/comment/post', async (req, res) => {
       content,
       publishedOn,
       updatedOn,
+      stars: stars,
       likes: 0,
       dislikes: 0,
       replies: [],
@@ -97,7 +98,7 @@ app.post('/comment/post', async (req, res) => {
 });
 
 app.post('/bundle/comment/post', async (req, res) => {
-  const { bundleId, userId, content } = req.body;
+  const { bundleId, userId, content, stars } = req.body;
 
   console.log('bundleId:', bundleId);
   console.log('userId:', userId);
@@ -127,6 +128,7 @@ app.post('/bundle/comment/post', async (req, res) => {
       content,
       publishedOn,
       updatedOn,
+      stars: stars,
       likes: 0,
       dislikes: 0,
       replies: [],
