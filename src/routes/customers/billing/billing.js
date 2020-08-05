@@ -72,4 +72,61 @@ app.get('/get/all/:userId', async (req, res) => {
     });
 });
 
+app.put('/edit/:billingId', async (req, res) => {
+  const {
+    id,
+    name,
+    country,
+    provinceState,
+    city,
+    addressLine1,
+    addressLine2,
+    postalCode,
+  } = req.body;
+
+  Billing.findOneAndUpdate(
+    {
+      _id: id,
+    },
+    {
+      name: {
+        first: name.first,
+        last: name.last,
+      },
+      country: country,
+      provinceState: provinceState,
+      city: city,
+      addressLine1: addressLine1,
+      addressLine2: addressLine2,
+      postalCode: postalCode,
+    },
+    {
+      runValidators: true,
+    }
+  )
+    .then((billing) => {
+      console.log('billing:', billing);
+      res.status(200).send({ ok: true });
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+});
+
+app.delete('/delete/:billingId', async (req, res) => {
+  const { billingId } = req.params;
+
+  try {
+    const billingObj = await Billing.findOne({
+      _id: billingId,
+    });
+
+    billingObj.remove();
+
+    res.status(200).send({ ok: true });
+  } catch (err) {
+    console.error(err);
+  }
+});
+
 module.exports = app;
