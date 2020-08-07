@@ -14,9 +14,15 @@ const UserSchema = new mongoose.Schema({
     type: String,
     require: true,
   },
-  name: {
-    type: String,
-    required: false,
+  names: {
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: {
+      type: String,
+      require: true,
+    },
   },
   email: {
     type: String,
@@ -39,41 +45,14 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     require: true,
   },
+  isVerified: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
   origin: {
     type: String,
     required: true,
-  },
-  posts: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      required: false,
-    },
-  ],
-  quote: {
-    type: String,
-    required: false,
-  },
-  following: {
-    type: [],
-    required: false,
-  },
-  followers: {
-    type: [],
-    required: false,
-  },
-  socialMedia: {
-    github: {
-      type: String,
-      required: false,
-    },
-    linkedin: {
-      type: String,
-      required: false,
-    },
-    twitter: {
-      type: String,
-      required: false,
-    },
   },
   createdOn: {
     type: Date,

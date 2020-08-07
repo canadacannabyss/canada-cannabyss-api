@@ -69,6 +69,7 @@ app.use('/customers', require('./routes/customers/customers'));
 app.use('/customers/cart', require('./routes/customers/cart/cart'));
 app.use('/customers/order', require('./routes/customers/order/order'));
 app.use('/customers/orders', require('./routes/customers/orders/orders'));
+app.use('/customers/comments', require('./routes/customers/reviews/reviews'));
 app.use('/customers/billing', require('./routes/customers/billing/billing'));
 app.use('/customers/shipping', require('./routes/customers/shipping/shipping'));
 app.use(

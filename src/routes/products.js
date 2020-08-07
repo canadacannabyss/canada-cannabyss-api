@@ -173,6 +173,7 @@ app.get('/get/comments/:productId', async (req, res) => {
     })
     .then((comments) => {
       comments.map((comment) => {
+        console.log('comment product:', comment.user.names.firstName);
         commentsList.push({
           replies: comment.replies,
           updatedOn: comment.updatedOn,
@@ -180,7 +181,7 @@ app.get('/get/comments/:productId', async (req, res) => {
           user: {
             names: {
               firstName: comment.user.names.firstName,
-              lastName: comment.user.lastName,
+              lastName: comment.user.names.lastName,
             },
             username: comment.user.username,
             profileImage: {

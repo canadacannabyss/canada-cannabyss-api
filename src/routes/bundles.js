@@ -123,12 +123,20 @@ app.get('/get/comments/:bundleId', async (req, res) => {
     })
     .then((comments) => {
       comments.map((comment) => {
+        console.log('comment.user:', comment.user.names);
+        // console.log(
+        //   'comment.user.names.lastName:',
+        //   comment.user.names.lastName
+        // );
         commentsList.push({
           replies: comment.replies,
           updatedOn: comment.updatedOn,
           _id: comment._id,
           user: {
-            name: comment.user.name,
+            names: {
+              firstName: comment.user.names.firstName,
+              lastName: comment.user.names.lastName,
+            },
             username: comment.user.username,
             profileImage: {
               url: comment.user.profileImage.url,
