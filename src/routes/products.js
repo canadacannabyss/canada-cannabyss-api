@@ -257,7 +257,23 @@ app.get('/get/products/category/:category', async (req, res) => {
 
   const results = {};
 
-  if (endIndex < (await Product.countDocuments().exec())) {
+  console.log(
+    'await Product.countDocuments().exec():',
+    await Product.find({
+      'organization.category': categoryObj,
+    })
+      .countDocuments()
+      .exec()
+  );
+
+  if (
+    endIndex <
+    (await Product.find({
+      'organization.category': categoryObj,
+    })
+      .countDocuments()
+      .exec())
+  ) {
     results.next = {
       page: page + 1,
       limit: limit,
@@ -273,7 +289,7 @@ app.get('/get/products/category/:category', async (req, res) => {
 
   try {
     results.results = await Product.find({
-      'organization.category': categoryObj._id,
+      'organization.category': categoryObj,
     })
       .limit(limit)
       .skip(startIndex)
@@ -282,13 +298,7 @@ app.get('/get/products/category/:category', async (req, res) => {
         model: ProductMedia,
       })
       .exec();
-    let finalResult = {};
-    if (results.results !== null) {
-      finalResult = results;
-    } else {
-      finalResult = {};
-    }
-    res.status(200).send(finalResult);
+    res.status(200).send(results);
   } catch (err) {
     console.error(err);
   }

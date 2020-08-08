@@ -104,8 +104,9 @@ app.get('', async (req, res) => {
       path: 'media',
       model: ProductMedia,
     })
-    .then((product) => {
-      res.status(200).send(product);
+    .then((products) => {
+      console.log('products:', products);
+      res.status(200).send(products);
     })
     .catch((err) => {
       console.error(err);

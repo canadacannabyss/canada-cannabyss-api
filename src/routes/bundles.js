@@ -209,7 +209,14 @@ app.get('/get/bundles/category/:category', async (req, res) => {
 
   const results = {};
 
-  if (endIndex < (await Bundle.countDocuments().exec())) {
+  if (
+    endIndex <
+    (await Bundle.find({
+      'organization.category': categoryObj._id,
+    })
+      .countDocuments()
+      .exec())
+  ) {
     results.next = {
       page: page + 1,
       limit: limit,
@@ -238,13 +245,7 @@ app.get('/get/bundles/category/:category', async (req, res) => {
         },
       })
       .exec();
-    let finalResult = {};
-    if (results.results !== null) {
-      finalResult = results;
-    } else {
-      finalResult = {};
-    }
-    res.status(200).send(finalResult);
+    res.status(200).send(results);
   } catch (err) {
     console.error(err);
   }
