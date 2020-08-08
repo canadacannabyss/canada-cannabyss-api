@@ -98,6 +98,20 @@ const createCategory = async (category) => {
   return newCategoryCreated._id;
 };
 
+app.get('', async (req, res) => {
+  Product.find()
+    .populate({
+      path: 'media',
+      model: ProductMedia,
+    })
+    .then((product) => {
+      res.status(200).send(product);
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+});
+
 app.get('/panel/get/:slug', (req, res) => {
   const { slug } = req.params;
   Product.findOne({

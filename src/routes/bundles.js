@@ -22,23 +22,46 @@ const UserProfileImage = require('../models/user/UserProfileImage');
 const Category = require('../models/category/Category');
 const CategoryMedia = require('../models/category/CategoryMedia');
 
-app.get('/', (req, res) => {
-  let productsList = [];
-  Bundle.find()
-    .populate({
-      path: 'products',
-      model: Product,
-      populate: {
-        path: 'media',
-        model: ProductMedia,
-      },
-    })
-    .then((product) => {
-      res.json(product);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+app.get('', async (req, res) => {
+  const page = parseInt(req.query.page);
+  const limit = parseInt(req.query.limit);
+
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+
+  const results = {};
+
+  if (endIndex < (await Bundle.countDocuments().exec())) {
+    results.next = {
+      page: page + 1,
+      limit: limit,
+    };
+  }
+
+  if (startIndex > 0) {
+    results.previous = {
+      page: page - 1,
+      limit: limit,
+    };
+  }
+
+  try {
+    results.results = await Bundle.find()
+      .limit(limit)
+      .skip(startIndex)
+      .populate({
+        path: 'products',
+        model: Product,
+        populate: {
+          path: 'media',
+          model: ProductMedia,
+        },
+      })
+      .exec();
+    res.status(200).send(results);
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 app.get('/navbar/all', (req, res) => {
@@ -174,32 +197,56 @@ app.get('/get/categories', async (req, res) => {
 
 app.get('/get/bundles/category/:category', async (req, res) => {
   const { category } = req.params;
+  const categoryObj = await Category.findOne({
+    slug: category,
+  });
+
+  const page = parseInt(req.query.page);
+  const limit = parseInt(req.query.limit);
+
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+
+  const results = {};
+
+  if (endIndex < (await Bundle.countDocuments().exec())) {
+    results.next = {
+      page: page + 1,
+      limit: limit,
+    };
+  }
+
+  if (startIndex > 0) {
+    results.previous = {
+      page: page - 1,
+      limit: limit,
+    };
+  }
 
   try {
-    const categoryObj = await Category.findOne({
-      slug: category,
-    });
-    console.log('categoryObj:', categoryObj);
-
-    const BundlessList = await Bundle.find({
+    results.results = await Bundle.find({
       'organization.category': categoryObj._id,
-    }).populate({
-      path: 'products',
-      model: Product,
-      populate: {
-        path: 'media',
-        model: ProductMedia,
-      },
-    });
-
-    console.log('BundlessList:', BundlessList);
-    if (BundlessList !== null) {
-      res.status(200).send(BundlessList);
+    })
+      .limit(limit)
+      .skip(startIndex)
+      .populate({
+        path: 'products',
+        model: Product,
+        populate: {
+          path: 'media',
+          model: ProductMedia,
+        },
+      })
+      .exec();
+    let finalResult = {};
+    if (results.results !== null) {
+      finalResult = results;
     } else {
-      res.status(200).send([]);
+      finalResult = {};
     }
+    res.status(200).send(finalResult);
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 });
 

@@ -21,19 +21,44 @@ const UserProfileImage = require('../models/user/UserProfileImage');
 const Category = require('../models/category/Category');
 const CategoryMedia = require('../models/category/CategoryMedia');
 
-app.get('/', (req, res) => {
+app.get('', async (req, res) => {
   let productsList = [];
-  Product.find()
-    .populate({
-      path: 'media',
-      model: ProductMedia,
-    })
-    .then((product) => {
-      res.json(product);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+
+  const page = parseInt(req.query.page);
+  const limit = parseInt(req.query.limit);
+
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+
+  const results = {};
+
+  if (endIndex < (await Product.countDocuments().exec())) {
+    results.next = {
+      page: page + 1,
+      limit: limit,
+    };
+  }
+
+  if (startIndex > 0) {
+    results.previous = {
+      page: page - 1,
+      limit: limit,
+    };
+  }
+
+  try {
+    results.results = await Product.find()
+      .limit(limit)
+      .skip(startIndex)
+      .populate({
+        path: 'media',
+        model: ProductMedia,
+      })
+      .exec();
+    res.status(200).send(results);
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 app.get('/navbar/all', (req, res) => {
@@ -220,29 +245,52 @@ app.get('/get/categories', async (req, res) => {
 
 app.get('/get/products/category/:category', async (req, res) => {
   const { category } = req.params;
-  console.log('category:', category);
+  const categoryObj = await Category.findOne({
+    slug: category,
+  });
+
+  const page = parseInt(req.query.page);
+  const limit = parseInt(req.query.limit);
+
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+
+  const results = {};
+
+  if (endIndex < (await Product.countDocuments().exec())) {
+    results.next = {
+      page: page + 1,
+      limit: limit,
+    };
+  }
+
+  if (startIndex > 0) {
+    results.previous = {
+      page: page - 1,
+      limit: limit,
+    };
+  }
 
   try {
-    const categoryObj = await Category.findOne({
-      slug: category,
-    });
-    console.log('categoryObj:', categoryObj);
-
-    const productsList = await Product.find({
+    results.results = await Product.find({
       'organization.category': categoryObj._id,
-    }).populate({
-      path: 'media',
-      model: ProductMedia,
-    });
-
-    console.log('productsList:', productsList);
-    if (productsList !== null) {
-      res.status(200).send(productsList);
+    })
+      .limit(limit)
+      .skip(startIndex)
+      .populate({
+        path: 'media',
+        model: ProductMedia,
+      })
+      .exec();
+    let finalResult = {};
+    if (results.results !== null) {
+      finalResult = results;
     } else {
-      res.status(200).send([]);
+      finalResult = {};
     }
+    res.status(200).send(finalResult);
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 });
 

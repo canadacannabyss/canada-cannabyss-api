@@ -79,6 +79,28 @@ const createCategory = async (category) => {
   return newCategoryCreated._id;
 };
 
+app.get('', async (req, res) => {
+  Bundle.find()
+    .populate({
+      path: 'products',
+      model: Product,
+      populate: {
+        path: 'media',
+        model: ProductMedia,
+      },
+    })
+    .populate({
+      path: 'organization.category',
+      model: Category,
+    })
+    .then((product) => {
+      res.status(200).send(product);
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+});
+
 app.get('/panel/get/:slug', (req, res) => {
   const { slug } = req.params;
   Bundle.findOne({
