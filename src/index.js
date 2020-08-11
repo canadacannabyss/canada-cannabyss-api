@@ -61,6 +61,7 @@ app.use(
 );
 
 // Routes
+app.use('/search', require('./routes/search'));
 app.use('/home', require('./routes/home'));
 app.use('/products', require('./routes/products'));
 app.use('/promotionS', require('./routes/promotions'));
