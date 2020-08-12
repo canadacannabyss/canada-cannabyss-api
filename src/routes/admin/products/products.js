@@ -162,6 +162,21 @@ app.post('/publish', async (req, res) => {
     seo,
     organization,
   } = req.body;
+  console.log(
+    'product:',
+    media,
+    isSlugValid,
+    variants,
+    productName,
+    prices,
+    taxableProduct,
+    description,
+    extraInfo,
+    inventory,
+    shipping,
+    seo,
+    organization
+  );
 
   let slug = stringToSlug(productName);
   console.log('promised slug:', slug);
@@ -189,7 +204,13 @@ app.post('/publish', async (req, res) => {
         description,
         extraInfo,
         inventory,
-        shipping,
+        shipping: {
+          physicalProduct: shipping.physicalProduct,
+          weight: {
+            unit: shipping.weight.unit,
+            amount: shipping.weight.amount,
+          },
+        },
         seo,
         organization: {
           category: categoryObj,

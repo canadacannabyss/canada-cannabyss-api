@@ -119,7 +119,9 @@ app.get('/get/product/:slug', (req, res) => {
       }
       product.variants.variantsOptionNames.map((name, index) => {
         product.variants.values.map((value) => {
-          variantsValues[index].push(value.variantValues[index]);
+          if (value.active) {
+            variantsValues[index].push(value.variantValues[index]);
+          }
         });
       });
       const uniqueVariantValues = [];
