@@ -56,11 +56,10 @@ module.exports = {
       'image/pjpeg',
       'image/png',
       'image/gif',
-      'audio/mpeg',
-      'audio/mp3',
-      'audio/wav',
-      'audio/acc',
-      'audio/ogg',
+      'video/avi',
+      'video/mp4',
+      'video/mov',
+      'video/wmv',
     ];
 
     if (allowedMimes.includes(file.mimetype)) {

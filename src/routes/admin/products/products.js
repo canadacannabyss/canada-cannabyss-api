@@ -246,6 +246,8 @@ app.post(
       const { originalname: name, size, key, location: url = '' } = req.file;
       const id = uuidv4();
 
+      console.log(name, size, key, url);
+
       const productMedia = await ProductMedia.create({
         id,
         name,

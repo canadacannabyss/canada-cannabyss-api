@@ -66,6 +66,7 @@ app.use('/home', require('./routes/home'));
 app.use('/products', require('./routes/products'));
 app.use('/promotionS', require('./routes/promotions'));
 app.use('/bundles', require('./routes/bundles'));
+app.use('/categories', require('./routes/categories'));
 app.use('/customers', require('./routes/customers/customers'));
 app.use('/customers/cart', require('./routes/customers/cart/cart'));
 app.use('/customers/order', require('./routes/customers/order/order'));
