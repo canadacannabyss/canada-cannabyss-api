@@ -20,6 +20,7 @@ const User = require('../models/user/User');
 const UserProfileImage = require('../models/user/UserProfileImage');
 const Category = require('../models/category/Category');
 const CategoryMedia = require('../models/category/CategoryMedia');
+const Tag = require('../models/tag/Tag');
 
 app.get('', async (req, res) => {
   let productsList = [];
@@ -112,6 +113,14 @@ app.get('/get/product/:slug', (req, res) => {
       path: 'media',
       model: ProductMedia,
     })
+    .populate({
+      path: 'organization.categories',
+      model: Category,
+    })
+    .populate({
+      path: 'organization.tags',
+      model: Tag,
+    })
     .then((product) => {
       const variantsValues = [];
       for (let i = 0; i < product.variants.variantsOptionNames.length; i += 1) {
@@ -161,8 +170,8 @@ app.get('/get/product/:slug', (req, res) => {
           description: product.seo.description,
         },
         organization: {
+          categories: product.organization.categories,
           tags: product.organization.tags,
-          category: product.organization.category,
         },
         media: product.media,
         howManyViewed: product.howManyViewed,
@@ -196,7 +205,7 @@ app.get('/get/comments/:productId', async (req, res) => {
       },
     })
     .sort({
-      publishedOn: '-1',
+      createdOn: '-1',
     })
     .then((comments) => {
       comments.map((comment) => {
@@ -216,7 +225,7 @@ app.get('/get/comments/:productId', async (req, res) => {
             },
           },
           content: comment.content,
-          publishedOn: comment.publishedOn,
+          createdOn: comment.createdOn,
           likes: comment.likes,
           dislikes: comment.dislikes,
         });

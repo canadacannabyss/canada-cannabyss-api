@@ -118,17 +118,22 @@ const ProductSchema = new mongoose.Schema({
     },
   },
   organization: {
-    category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category',
-      required: true,
-    },
-    tags: {
-      type: [String],
-      required: true,
-    },
+    categories: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
+        required: true,
+      },
+    ],
+    tags: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Tag',
+        required: true,
+      },
+    ],
   },
-  createdAt: {
+  createdOn: {
     type: Date,
     required: true,
     default: Date.now(),

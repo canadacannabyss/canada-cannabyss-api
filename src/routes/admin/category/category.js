@@ -48,7 +48,7 @@ const convertNameToSlug = (name) => {
 app.get('/panel/get/all', (req, res) => {
   Category.find()
     .sort({
-      createdAt: -1,
+      createdOn: -1,
     })
     .then((categories) => {
       let categoryList = [];

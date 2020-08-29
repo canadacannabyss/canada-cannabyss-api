@@ -20,7 +20,7 @@ app.get('/products', async (req, res) => {
   //   const { userId } = req.params;
 
   Product.find()
-    .sort({ createdAt: -1 })
+    .sort({ createdOn: -1 })
     .limit(4)
     .populate({
       path: 'media',

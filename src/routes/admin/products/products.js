@@ -17,6 +17,7 @@ const Product = require('../../../models/product/Product');
 const ProductMedia = require('../../../models/product/ProductMedia');
 const Category = require('../../../models/category/Category');
 const CategoryMedia = require('../../../models/category/CategoryMedia');
+const Tag = require('../../../models/tag/Tag');
 
 const verifyValidSlug = async (slug) => {
   try {
@@ -82,7 +83,6 @@ const getCategory = async (category) => {
 
 const createCategory = async (category) => {
   const slug = stringToSlug(category);
-  let categoryId = '';
   const newCategory = new Category({
     categoryName: category,
     slug,
@@ -96,6 +96,39 @@ const createCategory = async (category) => {
   });
   const newCategoryCreated = await newCategory.save();
   return newCategoryCreated._id;
+};
+
+const getTag = async (tag) => {
+  try {
+    const tagObj = await Tag.findOne({
+      tagName: tag,
+    });
+    console.log('tagObj:', tagObj);
+    if (tagObj === null) {
+      return {};
+    }
+    return tagObj._id;
+  } catch (err) {
+    console.log(err);
+    return {};
+  }
+};
+
+const createTag = async (tag) => {
+  const slug = stringToSlug(tag);
+  const newTag = new Tag({
+    tagName: tag,
+    slug,
+    howManyViewed: 0,
+    description: 'Description',
+    seo: {
+      title: tag,
+      slug,
+      description: 'Seo Description',
+    },
+  });
+  const newTagCreated = await newTag.save();
+  return newTagCreated._id;
 };
 
 app.get('', async (req, res) => {
@@ -162,21 +195,6 @@ app.post('/publish', async (req, res) => {
     seo,
     organization,
   } = req.body;
-  console.log(
-    'product:',
-    media,
-    isSlugValid,
-    variants,
-    productName,
-    prices,
-    taxableProduct,
-    description,
-    extraInfo,
-    inventory,
-    shipping,
-    seo,
-    organization
-  );
 
   let slug = stringToSlug(productName);
   console.log('promised slug:', slug);
@@ -186,13 +204,29 @@ app.post('/publish', async (req, res) => {
 
   if (await verifyValidSlug(slug)) {
     try {
-      let categoryObj = await getCategory(organization.category);
-      console.log('categoryObj get:', categoryObj);
+      const promisesCategories = organization.categories.map(
+        async (category) => {
+          let categoryObj = await getCategory(category);
 
-      if (_.isEmpty(categoryObj)) {
-        categoryObj = await createCategory(organization.category);
-      }
-      console.log('categoryObj new:', categoryObj);
+          if (_.isEmpty(categoryObj)) {
+            categoryObj = await createCategory(category);
+          }
+          return categoryObj;
+        }
+      );
+
+      const resultsAsyncCategoriesArray = await Promise.all(promisesCategories);
+
+      const promisesTags = organization.tags.map(async (tag) => {
+        let tagObj = await getTag(tag);
+
+        if (_.isEmpty(tagObj)) {
+          tagObj = await createTag(tag);
+        }
+        return tagObj;
+      });
+
+      const resultsAsyncTagsArray = await Promise.all(promisesTags);
 
       const newProduct = new Product({
         media,
@@ -213,8 +247,8 @@ app.post('/publish', async (req, res) => {
         },
         seo,
         organization: {
-          category: categoryObj,
-          tags: organization.tags,
+          categories: resultsAsyncCategoriesArray,
+          tags: resultsAsyncTagsArray,
         },
       });
 

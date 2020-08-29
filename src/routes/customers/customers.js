@@ -36,7 +36,7 @@ app.post('/comment/post', async (req, res) => {
     });
   } else {
     const id = uuidv4();
-    const publishedOn = Date.now();
+    const createdOn = Date.now();
     const updatedOn = null;
     let commentObj;
     let commentId;
@@ -45,7 +45,7 @@ app.post('/comment/post', async (req, res) => {
       user: userId,
       product: productId,
       content,
-      publishedOn,
+      createdOn,
       updatedOn,
       stars: stars,
       likes: 0,
@@ -82,7 +82,7 @@ app.post('/comment/post', async (req, res) => {
           model: Product,
         })
         .sort({
-          publishedOn: '-1',
+          createdOn: '-1',
         });
 
       console.log('commentsArray:', commentsArray);
@@ -117,7 +117,7 @@ app.post('/bundle/comment/post', async (req, res) => {
     });
   } else {
     const id = uuidv4();
-    const publishedOn = Date.now();
+    const createdOn = Date.now();
     const updatedOn = null;
     let commentObj;
     let commentId;
@@ -126,7 +126,7 @@ app.post('/bundle/comment/post', async (req, res) => {
       user: userId,
       bundle: bundleId,
       content,
-      publishedOn,
+      createdOn,
       updatedOn,
       stars: stars,
       likes: 0,
@@ -163,7 +163,7 @@ app.post('/bundle/comment/post', async (req, res) => {
           model: Bundle,
         })
         .sort({
-          publishedOn: '-1',
+          createdOn: '-1',
         });
 
       console.log('commentsArray:', commentsArray);
@@ -196,7 +196,7 @@ app.post('/comment/reply', async (req, res) => {
     });
   } else {
     const id = uuidv4();
-    const publishedOn = Date.now();
+    const createdOn = Date.now();
     const updatedOn = null;
     let commentIdVar;
     const newCommentReply = new CommentReply({
@@ -205,7 +205,7 @@ app.post('/comment/reply', async (req, res) => {
       product: productId,
       comment: commentId,
       content,
-      publishedOn,
+      createdOn,
       updatedOn,
       likes: 0,
       dislikes: 0,

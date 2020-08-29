@@ -63,7 +63,7 @@ const CouponSchema = new mongoose.Schema({
       default: 0,
     },
   },
-  createdAt: {
+  createdOn: {
     type: Date,
     required: true,
     default: Date.now(),

@@ -6,16 +6,12 @@ var db = mongoose.createConnection(process.env.ATLAS_URI_CANADA_CANNABYSS, {
   useUnifiedTopology: true,
 });
 
-const BannerSchema = new mongoose.Schema({
-  bannerName: {
+const TagSchema = new mongoose.Schema({
+  tagName: {
     type: String,
     required: true,
   },
   slug: {
-    type: String,
-    required: true,
-  },
-  description: {
     type: String,
     required: true,
   },
@@ -24,13 +20,11 @@ const BannerSchema = new mongoose.Schema({
     required: true,
     default: 0,
   },
-  promotions: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product',
-      required: true,
-    },
-  ],
+  description: {
+    type: String,
+    required: true,
+    default: '',
+  },
   featured: {
     type: Boolean,
     required: false,
@@ -48,23 +42,8 @@ const BannerSchema = new mongoose.Schema({
     description: {
       type: String,
       required: true,
+      default: '',
     },
-  },
-  organization: {
-    categories: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Category',
-        required: true,
-      },
-    ],
-    tags: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Tag',
-        required: true,
-      },
-    ],
   },
   createdOn: {
     type: Date,
@@ -77,6 +56,6 @@ const BannerSchema = new mongoose.Schema({
   },
 });
 
-const Banner = db.model('Banner', BannerSchema);
+const Tag = db.model('Tag', TagSchema);
 
-module.exports = Banner;
+module.exports = Tag;

@@ -29,18 +29,12 @@ const PromotionSchema = new mongoose.Schema({
     required: true,
     default: 0,
   },
-  products: [
+  items: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product',
-      required: true,
-    },
-  ],
-  bundles: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Bundle',
-      required: true,
+      _id: {
+        type: String,
+        required: true,
+      },
     },
   ],
   seo: {
@@ -58,17 +52,22 @@ const PromotionSchema = new mongoose.Schema({
     },
   },
   organization: {
-    category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category',
-      required: false,
-    },
-    tags: {
-      type: [String],
-      required: true,
-    },
+    categories: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
+        required: true,
+      },
+    ],
+    tags: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Tag',
+        required: true,
+      },
+    ],
   },
-  createdAt: {
+  createdOn: {
     type: Date,
     required: true,
     default: Date.now(),

@@ -124,7 +124,7 @@ app.get('/main/category', (req, res) => {
       model: CategoryMedia,
     })
     .sort({
-      createdAt: -1,
+      createdOn: -1,
     })
     .limit(8)
     .then((categories) => {
@@ -144,7 +144,7 @@ app.get('/main/newest/products', (req, res) => {
     })
     .limit(4)
     .sort({
-      createdAt: -1,
+      createdOn: -1,
     })
     .then((products) => {
       products.map((product) => {
@@ -203,7 +203,7 @@ app.get('/get/comments/:productId', async (req, res) => {
       },
     })
     .sort({
-      publishedOn: '-1',
+      createdOn: '-1',
     })
     .then((comments) => {
       comments.map((comment) => {
@@ -219,7 +219,7 @@ app.get('/get/comments/:productId', async (req, res) => {
             },
           },
           content: comment.content,
-          publishedOn: comment.publishedOn,
+          createdOn: comment.createdOn,
           likes: comment.likes,
           dislikes: comment.dislikes,
         });

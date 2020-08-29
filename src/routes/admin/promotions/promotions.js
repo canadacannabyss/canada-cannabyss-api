@@ -18,6 +18,7 @@ const PromotionMedia = require('../../../models/promotion/PromotionMedia');
 const Product = require('../../../models/product/Product');
 const ProductMedia = require('../../../models/product/ProductMedia');
 const Category = require('../../../models/category/Category');
+const Tag = require('../../../models/tag/Tag');
 
 const verifyValidSlug = async (slug) => {
   try {
@@ -40,7 +41,6 @@ const stringToSlug = (string) => {
 };
 
 const getCategory = async (category) => {
-  console.log('getCategory:', category);
   try {
     const categoryObj = await Category.findOne({
       categoryName: category,
@@ -57,9 +57,7 @@ const getCategory = async (category) => {
 };
 
 const createCategory = async (category) => {
-  console.log('createCategory:', category);
   const slug = stringToSlug(category);
-  let categoryId = '';
   const newCategory = new Category({
     categoryName: category,
     slug,
@@ -72,8 +70,40 @@ const createCategory = async (category) => {
     },
   });
   const newCategoryCreated = await newCategory.save();
-  console.log('newCategoryCreated:', newCategoryCreated);
   return newCategoryCreated._id;
+};
+
+const getTag = async (tag) => {
+  try {
+    const tagObj = await Tag.findOne({
+      tagName: tag,
+    });
+    console.log('tagObj:', tagObj);
+    if (tagObj === null) {
+      return {};
+    }
+    return tagObj._id;
+  } catch (err) {
+    console.log(err);
+    return {};
+  }
+};
+
+const createTag = async (tag) => {
+  const slug = stringToSlug(tag);
+  const newTag = new Tag({
+    tagName: tag,
+    slug,
+    howManyViewed: 0,
+    description: 'Description',
+    seo: {
+      title: tag,
+      slug,
+      description: 'Seo Description',
+    },
+  });
+  const newTagCreated = await newTag.save();
+  return newTagCreated._id;
 };
 
 app.get('/get/all', async (req, res) => {
@@ -124,11 +154,10 @@ app.get('/validation/slug/:slug', (req, res) => {
 
 app.post('/publish', async (req, res) => {
   const {
-    products,
     isSlugValid,
     promotionName,
     media,
-    bundles,
+    items,
     description,
     seo,
     organization,
@@ -137,36 +166,48 @@ app.post('/publish', async (req, res) => {
   try {
     const slug = slugify(promotionName).toLowerCase();
     if (await verifyValidSlug(slug)) {
-      let categoryObj = await getCategory(organization.category);
-      console.log('categoryObj get:', categoryObj);
+      const promisesCategories = organization.categories.map(
+        async (category) => {
+          let categoryObj = await getCategory(category);
 
-      if (_.isEmpty(categoryObj)) {
-        console.log('NO CATEGORY FOUND');
-        categoryObj = await createCategory(organization.category);
-      }
-      console.log('categoryObj new:', categoryObj);
+          if (_.isEmpty(categoryObj)) {
+            categoryObj = await createCategory(category);
+          }
+          return categoryObj;
+        }
+      );
+
+      const resultsAsyncCategoriesArray = await Promise.all(promisesCategories);
+
+      const promisesTags = organization.tags.map(async (tag) => {
+        let tagObj = await getTag(tag);
+
+        if (_.isEmpty(tagObj)) {
+          tagObj = await createTag(tag);
+        }
+        return tagObj;
+      });
+
+      const resultsAsyncTagsArray = await Promise.all(promisesTags);
 
       const newPromotion = new Promotion({
-        products,
         media,
-        bundles,
         promotionName,
         slug,
         description,
+        items,
         seo,
         organization: {
-          category: categoryObj,
-          tags: organization.tags,
+          categories: resultsAsyncCategoriesArray,
+          tags: resultsAsyncTagsArray,
         },
       });
-
-      console.log('newPromotion:', newPromotion);
 
       newPromotion
         .save()
         .then((promotion) => {
           res.status(201).send({
-            _id: promotion._id,
+            slug: promotion.slug,
           });
         })
         .catch((err) => {

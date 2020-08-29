@@ -75,7 +75,7 @@ const CartSchema = new mongoose.Schema({
     required: false,
     default: false,
   },
-  createdAt: {
+  createdOn: {
     type: Date,
     required: true,
     default: Date.now(),

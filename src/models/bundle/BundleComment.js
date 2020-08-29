@@ -41,7 +41,7 @@ const BundleCommentSchema = new mongoose.Schema({
       required: false,
     },
   ],
-  publishedOn: {
+  createdOn: {
     type: Date,
     default: Date.now,
   },

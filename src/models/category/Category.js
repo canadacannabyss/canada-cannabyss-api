@@ -51,7 +51,7 @@ const CategorySchema = new mongoose.Schema({
       default: '',
     },
   },
-  createdAt: {
+  createdOn: {
     type: Date,
     required: true,
     default: Date.now(),

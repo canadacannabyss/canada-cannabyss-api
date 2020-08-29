@@ -15,7 +15,7 @@ const BundleVariantSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  createdAt: {
+  createdOn: {
     type: Date,
     required: true,
     default: Date.now(),

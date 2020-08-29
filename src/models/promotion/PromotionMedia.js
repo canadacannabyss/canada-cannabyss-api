@@ -20,7 +20,7 @@ const PromotionMediaSchema = new mongoose.Schema({
   size: Number,
   key: String,
   url: String,
-  createdAt: {
+  createdOn: {
     type: Date,
     default: Date.now,
   },

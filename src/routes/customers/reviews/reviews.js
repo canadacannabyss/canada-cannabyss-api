@@ -53,7 +53,7 @@ app.get('/user/:userId', async (req, res) => {
           productName: comment.product.productName,
           slug: comment.product.slug,
         },
-        publishedOn: comment.publishedOn,
+        createdOn: comment.createdOn,
         content: comment.content,
       });
     });
@@ -90,7 +90,7 @@ app.get('/user/:userId', async (req, res) => {
           bundleName: comment.bundle.bundleName,
           slug: comment.bundle.slug,
         },
-        publishedOn: comment.publishedOn,
+        createdOn: comment.createdOn,
         content: comment.content,
       });
     });

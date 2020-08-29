@@ -97,11 +97,29 @@ app.post('/publish', async (req, res) => {
   try {
     const slug = slugify(bannerName).toLowerCase();
     if (await verifyValidSlug(slug)) {
-      let categoryObj = await getCategory(organization.category);
+      const promisesCategories = organization.categories.map(
+        async (category) => {
+          let categoryObj = await getCategory(category);
 
-      if (_.isEmpty(categoryObj)) {
-        categoryObj = await createCategory(organization.category);
-      }
+          if (_.isEmpty(categoryObj)) {
+            categoryObj = await createCategory(category);
+          }
+          return categoryObj;
+        }
+      );
+
+      const resultsAsyncCategoriesArray = await Promise.all(promisesCategories);
+
+      const promisesTags = organization.tags.map(async (tag) => {
+        let tagObj = await getTag(tag);
+
+        if (_.isEmpty(tagObj)) {
+          tagObj = await createTag(tag);
+        }
+        return tagObj;
+      });
+
+      const resultsAsyncTagsArray = await Promise.all(promisesTags);
 
       const newBanner = new Banner({
         bannerName: bannerName,
@@ -111,8 +129,8 @@ app.post('/publish', async (req, res) => {
         featured: featured,
         seo,
         organization: {
-          category: categoryObj,
-          tags: organization.tags,
+          categories: resultsAsyncCategoriesArray,
+          tags: resultsAsyncTagsArray,
         },
       });
 

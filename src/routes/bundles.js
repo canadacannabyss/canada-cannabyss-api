@@ -142,7 +142,7 @@ app.get('/get/comments/:bundleId', async (req, res) => {
       },
     })
     .sort({
-      publishedOn: '-1',
+      createdOn: '-1',
     })
     .then((comments) => {
       comments.map((comment) => {
@@ -166,7 +166,7 @@ app.get('/get/comments/:bundleId', async (req, res) => {
             },
           },
           content: comment.content,
-          publishedOn: comment.publishedOn,
+          createdOn: comment.createdOn,
           likes: comment.likes,
           dislikes: comment.dislikes,
         });
