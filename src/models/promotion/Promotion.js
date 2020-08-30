@@ -29,12 +29,18 @@ const PromotionSchema = new mongoose.Schema({
     required: true,
     default: 0,
   },
-  items: [
+  products: [
     {
-      _id: {
-        type: String,
-        required: true,
-      },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Product',
+      required: false,
+    },
+  ],
+  bundles: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Bundle',
+      required: false,
     },
   ],
   seo: {

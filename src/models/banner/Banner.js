@@ -27,7 +27,7 @@ const BannerSchema = new mongoose.Schema({
   promotions: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product',
+      ref: 'Promotion',
       required: true,
     },
   ],

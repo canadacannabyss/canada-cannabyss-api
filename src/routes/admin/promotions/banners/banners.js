@@ -17,6 +17,7 @@ const Banner = require('../../../../models/banner/Banner');
 const Promotion = require('../../../../models/promotion/Promotion');
 const PromotionMedia = require('../../../../models/promotion/PromotionMedia');
 const Category = require('../../../../models/category/Category');
+const Tag = require('../../../../models/tag/Tag');
 
 const verifyValidSlug = async (slug) => {
   try {
@@ -35,7 +36,6 @@ const verifyValidSlug = async (slug) => {
 };
 
 const getCategory = async (category) => {
-  console.log('getCategory:', category);
   try {
     const categoryObj = await Category.findOne({
       categoryName: category,
@@ -52,9 +52,7 @@ const getCategory = async (category) => {
 };
 
 const createCategory = async (category) => {
-  console.log('createCategory:', category);
   const slug = stringToSlug(category);
-  let categoryId = '';
   const newCategory = new Category({
     categoryName: category,
     slug,
@@ -67,8 +65,40 @@ const createCategory = async (category) => {
     },
   });
   const newCategoryCreated = await newCategory.save();
-  console.log('newCategoryCreated:', newCategoryCreated);
   return newCategoryCreated._id;
+};
+
+const getTag = async (tag) => {
+  try {
+    const tagObj = await Tag.findOne({
+      tagName: tag,
+    });
+    console.log('tagObj:', tagObj);
+    if (tagObj === null) {
+      return {};
+    }
+    return tagObj._id;
+  } catch (err) {
+    console.log(err);
+    return {};
+  }
+};
+
+const createTag = async (tag) => {
+  const slug = stringToSlug(tag);
+  const newTag = new Tag({
+    tagName: tag,
+    slug,
+    howManyViewed: 0,
+    description: 'Description',
+    seo: {
+      title: tag,
+      slug,
+      description: 'Seo Description',
+    },
+  });
+  const newTagCreated = await newTag.save();
+  return newTagCreated._id;
 };
 
 const stringToSlug = (string) => {
@@ -93,6 +123,8 @@ app.post('/publish', async (req, res) => {
     featured,
     organization,
   } = req.body;
+
+  console.log(bannerName, description, promotions, seo, featured, organization);
 
   try {
     const slug = slugify(bannerName).toLowerCase();
