@@ -21,7 +21,7 @@ const Coupon = require('../../../models/coupon/Coupon');
 
 // app.use(authMiddleware);
 
-app.get('/get/orders/all', async (req, res) => {
+app.get('', async (req, res) => {
   Order.find({
     completed: true,
   })
@@ -56,6 +56,19 @@ app.get('/get/orders/all', async (req, res) => {
     .then((orders) => {
       console.log('orders:', orders);
       res.status(200).send(orders);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+app.get('/:orderId', async (req, res) => {
+  const { orderId } = req.params;
+  Order.findOne({
+    _id: orderId,
+  })
+    .then((order) => {
+      res.status(200).send(order);
     })
     .catch((err) => {
       console.log(err);

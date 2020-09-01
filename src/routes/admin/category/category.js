@@ -45,20 +45,13 @@ const convertNameToSlug = (name) => {
   return slugify(name.toLowerCase());
 };
 
-app.get('/panel/get/all', (req, res) => {
+app.get('', (req, res) => {
   Category.find()
     .sort({
       createdOn: -1,
     })
     .then((categories) => {
-      let categoryList = [];
-      categories.map((category) => {
-        categoryList.push({
-          categoryName: category.categoryName,
-          slug: category.slug,
-        });
-      });
-      res.json(categoryList);
+      res.json(categories);
     })
     .catch((err) => {
       console.log(err);
