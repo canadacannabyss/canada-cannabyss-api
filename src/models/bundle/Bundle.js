@@ -7,6 +7,11 @@ var db = mongoose.createConnection(process.env.ATLAS_URI_CANADA_CANNABYSS, {
 });
 
 const BundleSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
   products: [
     {
       type: mongoose.Schema.Types.ObjectId,

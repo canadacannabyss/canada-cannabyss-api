@@ -116,6 +116,7 @@ app.get('/validation/slug/:slug', (req, res) => {
 
 app.post('/publish', async (req, res) => {
   const {
+    userId,
     bannerName,
     description,
     promotions,
@@ -154,6 +155,7 @@ app.post('/publish', async (req, res) => {
       const resultsAsyncTagsArray = await Promise.all(promisesTags);
 
       const newBanner = new Banner({
+        user: userId,
         bannerName: bannerName,
         slug: slug,
         description: description,

@@ -154,6 +154,7 @@ app.get('/validation/slug/:slug', (req, res) => {
 
 app.post('/publish', async (req, res) => {
   const {
+    userId,
     isSlugValid,
     promotionName,
     media,
@@ -192,6 +193,7 @@ app.post('/publish', async (req, res) => {
       const resultsAsyncTagsArray = await Promise.all(promisesTags);
 
       const newPromotion = new Promotion({
+        user: userId,
         media,
         promotionName,
         slug,

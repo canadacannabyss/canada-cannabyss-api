@@ -110,6 +110,14 @@ app.get('/get/bundle/:slug', (req, res) => {
     slug,
   })
     .populate({
+      path: 'user',
+      model: User,
+      populate: {
+        path: 'profileImage',
+        model: UserProfileImage,
+      },
+    })
+    .populate({
       path: 'products',
       model: Product,
       populate: {

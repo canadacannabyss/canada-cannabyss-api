@@ -182,6 +182,7 @@ app.get('/validation/slug/:slug', (req, res) => {
 
 app.post('/publish', async (req, res) => {
   const {
+    userId,
     media,
     isSlugValid,
     variants,
@@ -229,6 +230,7 @@ app.post('/publish', async (req, res) => {
       const resultsAsyncTagsArray = await Promise.all(promisesTags);
 
       const newProduct = new Product({
+        user: userId,
         media,
         variants,
         productName,

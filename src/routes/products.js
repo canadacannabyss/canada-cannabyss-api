@@ -110,6 +110,14 @@ app.get('/get/product/:slug', (req, res) => {
     slug,
   })
     .populate({
+      path: 'user',
+      model: User,
+      populate: {
+        path: 'profileImage',
+        model: UserProfileImage,
+      },
+    })
+    .populate({
       path: 'media',
       model: ProductMedia,
     })
@@ -172,6 +180,18 @@ app.get('/get/product/:slug', (req, res) => {
         organization: {
           categories: product.organization.categories,
           tags: product.organization.tags,
+        },
+        user: {
+          _id: product.user._id,
+          names: {
+            firstName: product.user.names.firstName,
+            lastName: product.user.names.lastName,
+          },
+          username: product.user.username,
+          profileImage: {
+            name: product.user.profileImage.name,
+            url: product.user.profileImage.url,
+          },
         },
         media: product.media,
         howManyViewed: product.howManyViewed,
