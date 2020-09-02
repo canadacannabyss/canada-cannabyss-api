@@ -133,13 +133,21 @@ app.get('/validation/slug/:slug', (req, res) => {
 });
 
 app.post('/publish', async (req, res) => {
-  const { media, isSlugValid, categoryName, description, seo } = req.body;
+  const {
+    media,
+    isSlugValid,
+    categoryName,
+    featured,
+    description,
+    seo,
+  } = req.body;
 
   let errors = [];
   if (
     _.isEmpty(media) ||
     !typeof isSlugValid === 'boolean' ||
     !categoryName ||
+    !typeof featured === 'boolean' ||
     !description ||
     !seo.title ||
     !seo.slug ||
@@ -189,6 +197,7 @@ app.post('/publish', async (req, res) => {
       const newCategory = new Category({
         media,
         categoryName,
+        featured,
         slug,
         description,
         seo,

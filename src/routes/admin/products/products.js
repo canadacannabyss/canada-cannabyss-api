@@ -1,17 +1,11 @@
 const express = require('express');
 
-const app = express();
-const cors = require('cors');
+const router = express.Router();
 const uuidv4 = require('uuid/v4');
 const multer = require('multer');
 const multerConfig = require('../../../config/multer');
 const slugify = require('slugify');
 const _ = require('lodash');
-
-const authMiddleware = require('../../../middleware/auth');
-
-app.use(cors());
-// app.use(authMiddleware);
 
 const Product = require('../../../models/product/Product');
 const ProductMedia = require('../../../models/product/ProductMedia');
@@ -131,7 +125,7 @@ const createTag = async (tag) => {
   return newTagCreated._id;
 };
 
-app.get('', async (req, res) => {
+router.get('', async (req, res) => {
   Product.find()
     .populate({
       path: 'media',
@@ -146,7 +140,7 @@ app.get('', async (req, res) => {
     });
 });
 
-app.get('/panel/get/:slug', (req, res) => {
+router.get('/panel/get/:slug', (req, res) => {
   const { slug } = req.params;
   Product.findOne({
     slug,
@@ -172,7 +166,7 @@ app.get('/panel/get/:slug', (req, res) => {
 });
 
 // Check if Podcast slug is valid
-app.get('/validation/slug/:slug', (req, res) => {
+router.get('/validation/slug/:slug', (req, res) => {
   const { slug } = req.params;
   const verificationRes = verifyValidSlug(slug);
   res.json({
@@ -180,7 +174,7 @@ app.get('/validation/slug/:slug', (req, res) => {
   });
 });
 
-app.post('/publish', async (req, res) => {
+router.post('/publish', async (req, res) => {
   const {
     userId,
     media,
@@ -274,7 +268,7 @@ app.post('/publish', async (req, res) => {
   }
 });
 
-app.post(
+router.post(
   '/publish/media',
   multer(multerConfig).single('file'),
   async (req, res) => {
@@ -299,7 +293,7 @@ app.post(
   }
 );
 
-app.post('/set/global-variable', async (req, res) => {
+router.post('/set/global-variable', async (req, res) => {
   const { type, title } = req.body;
   global.gConfigMulter.type = type;
   global.gConfigMulter.title = title;
@@ -311,7 +305,7 @@ app.post('/set/global-variable', async (req, res) => {
 });
 
 // Update Product Info
-app.put('/update/:id', async (req, res) => {
+router.put('/update/:id', async (req, res) => {
   const {
     media,
     productName,
@@ -415,8 +409,44 @@ app.put('/update/:id', async (req, res) => {
   }
 });
 
+router.get('/:slug', (req, res) => {
+  const { slug } = req.params;
+
+  console.log('slug:', slug);
+
+  Product.findOne({
+    slug: slug,
+  })
+    .populate({
+      path: 'media',
+      model: ProductMedia,
+    })
+    .populate({
+      path: 'organization.categories',
+      model: Category,
+    })
+    .populate({
+      path: 'organization.tags',
+      model: Tag,
+    })
+    .then((product) => {
+      const errors = [];
+      if (!product) errors.push({ error: 'Product not found' });
+
+      if (errors.length > 0) {
+        res.status(400).send(errors);
+      } else {
+        res.status(200).send(product);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(400).send({ error: 'Server error' });
+    });
+});
+
 // Delete Podcast
-app.delete('/delete/product/:productId', async (req, res) => {
+router.delete('/delete/product/:productId', async (req, res) => {
   const { productId } = req.params;
   console.log('productId:', productId);
 
@@ -444,7 +474,7 @@ app.delete('/delete/product/:productId', async (req, res) => {
   }
 });
 
-app.delete('/delete/cover/:id', async (req, res) => {
+router.delete('/delete/cover/:id', async (req, res) => {
   const { id } = req.params;
   console.log('deleting product image id:', id);
   const coverFile = await ProductMedia.findOne({
@@ -457,4 +487,4 @@ app.delete('/delete/cover/:id', async (req, res) => {
   });
 });
 
-module.exports = app;
+module.exports = router;
