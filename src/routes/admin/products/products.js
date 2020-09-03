@@ -323,7 +323,7 @@ router.put('/update/:id', async (req, res) => {
 
   console.log('variants updated:', variants);
 
-  const slug = convertNameToSlug(productName);
+  const slug = stringToSlug(productName);
 
   try {
     let newMedia = [];
