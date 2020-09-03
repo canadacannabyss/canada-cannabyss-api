@@ -1,17 +1,12 @@
 const express = require('express');
 
-const app = express();
+const router = express.Router();
 const cors = require('cors');
 const uuidv4 = require('uuid/v4');
 const multer = require('multer');
 const multerConfig = require('../../../config/multer');
 const slugify = require('slugify');
 const _ = require('lodash');
-
-const authMiddleware = require('../../../middleware/auth');
-
-app.use(cors());
-// app.use(authMiddleware);
 
 const Bundle = require('../../../models/bundle/Bundle');
 const Category = require('../../../models/category/Category');
@@ -112,7 +107,7 @@ const createTag = async (tag) => {
   return newTagCreated._id;
 };
 
-app.get('', async (req, res) => {
+router.get('', async (req, res) => {
   Bundle.find()
     .populate({
       path: 'products',
@@ -134,7 +129,7 @@ app.get('', async (req, res) => {
     });
 });
 
-app.get('/panel/get/:slug', (req, res) => {
+router.get('/panel/get/:slug', (req, res) => {
   const { slug } = req.params;
   Bundle.findOne({
     slug,
@@ -159,8 +154,41 @@ app.get('/panel/get/:slug', (req, res) => {
     });
 });
 
+router.get('/:slug', (req, res) => {
+  const { slug } = req.params;
+
+  console.log('slug:', slug);
+
+  Bundle.findOne({
+    slug: slug,
+  })
+    .populate({
+      path: 'products',
+      model: Product,
+      populate: {
+        path: 'media',
+        model: ProductMedia,
+      },
+    })
+    .then((bundle) => {
+      console.log('bundle found:', bundle);
+      const errors = [];
+      if (!bundle) errors.push({ error: 'Bundle not found' });
+
+      if (errors.length > 0) {
+        res.status(400).send(errors);
+      } else {
+        res.status(200).send(bundle);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(400).send({ error: 'Server error' });
+    });
+});
+
 // Check if Podcast slug is valid
-app.get('/validation/slug/:slug', (req, res) => {
+router.get('/validation/slug/:slug', (req, res) => {
   const { slug } = req.params;
   const verificationRes = verifyValidSlug(slug);
   res.json({
@@ -168,7 +196,7 @@ app.get('/validation/slug/:slug', (req, res) => {
   });
 });
 
-app.post('/publish', async (req, res) => {
+router.post('/publish', async (req, res) => {
   const {
     userId,
     products,
@@ -257,7 +285,7 @@ app.post('/publish', async (req, res) => {
   }
 });
 
-app.post(
+router.post(
   '/publish/media',
   multer(multerConfig).single('file'),
   async (req, res) => {
@@ -277,7 +305,7 @@ app.post(
   }
 );
 
-app.post('/set/global-variable', async (req, res) => {
+router.post('/set/global-variable', async (req, res) => {
   const { type, title } = req.body;
   global.gConfigMulter.type = type;
   global.gConfigMulter.title = title;
@@ -289,7 +317,7 @@ app.post('/set/global-variable', async (req, res) => {
 });
 
 // Update Podcast Info
-app.put('/update/:id', async (req, res) => {
+router.put('/update/:id', async (req, res) => {
   const {
     products,
     variants,
@@ -370,7 +398,7 @@ app.put('/update/:id', async (req, res) => {
 });
 
 // Delete Podcast
-app.delete('/delete/:id', (req, res) => {
+router.delete('/delete/:id', (req, res) => {
   const { id } = req.params;
   Product.deleteOne({
     id,
@@ -388,7 +416,7 @@ app.delete('/delete/:id', (req, res) => {
 });
 
 // Delete Podcast
-app.delete('/delete/bundle/:bundleId', async (req, res) => {
+router.delete('/delete/bundle/:bundleId', async (req, res) => {
   const { bundleId } = req.params;
   console.log('bundleId:', bundleId);
 
@@ -413,7 +441,7 @@ app.delete('/delete/bundle/:bundleId', async (req, res) => {
   }
 });
 
-app.delete('/delete/cover/:id', async (req, res) => {
+router.delete('/delete/cover/:id', async (req, res) => {
   const { id } = req.params;
   const coverFile = await ProductMedia.findOne({
     _id: id,
@@ -426,4 +454,4 @@ app.delete('/delete/cover/:id', async (req, res) => {
   });
 });
 
-module.exports = app;
+module.exports = router;
