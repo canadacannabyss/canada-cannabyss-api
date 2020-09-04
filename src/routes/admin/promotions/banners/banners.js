@@ -1,23 +1,25 @@
 const express = require('express');
 
-const app = express();
-const cors = require('cors');
-const uuidv4 = require('uuid/v4');
-const multer = require('multer');
-const multerConfig = require('../../../../config/multer');
+const router = express.Router();
 const slugify = require('slugify');
 const _ = require('lodash');
 
-const authMiddleware = require('../../../../middleware/auth');
-
-app.use(cors());
-// app.use(authMiddleware);
+const {
+  slugifyString,
+  generateRandomSlug,
+} = require('../../../../utils/strings/slug');
+const {
+  getCategory,
+  createCategory,
+} = require('../../../../utils/categories/categories');
+const { getTag, createTag } = require('../../../../utils/tags/tags');
 
 const Banner = require('../../../../models/banner/Banner');
 const Promotion = require('../../../../models/promotion/Promotion');
 const PromotionMedia = require('../../../../models/promotion/PromotionMedia');
 const Category = require('../../../../models/category/Category');
 const Tag = require('../../../../models/tag/Tag');
+const { find } = require('lodash');
 
 const verifyValidSlug = async (slug) => {
   try {
@@ -35,78 +37,30 @@ const verifyValidSlug = async (slug) => {
   }
 };
 
-const getCategory = async (category) => {
-  try {
-    const categoryObj = await Category.findOne({
-      categoryName: category,
+router.get('', (res, req) => {
+  Banner.find()
+    .populate({
+      path: 'promotions',
+      model: Promotion,
+    })
+    .populate({
+      path: 'organization.categories',
+      model: Category,
+    })
+    .populate({
+      path: 'organization.tags',
+      model: Tag,
+    })
+    .then((banner) => {
+      res.json(banner);
+    })
+    .catch((err) => {
+      console.log(err);
     });
-    console.log('categoryObj:', categoryObj);
-    if (categoryObj === null) {
-      return {};
-    }
-    return categoryObj._id;
-  } catch (err) {
-    console.log(err);
-    return {};
-  }
-};
-
-const createCategory = async (category) => {
-  const slug = stringToSlug(category);
-  const newCategory = new Category({
-    categoryName: category,
-    slug,
-    howManyViewed: 0,
-    description: 'Description',
-    seo: {
-      title: category,
-      slug,
-      description: 'Seo Description',
-    },
-  });
-  const newCategoryCreated = await newCategory.save();
-  return newCategoryCreated._id;
-};
-
-const getTag = async (tag) => {
-  try {
-    const tagObj = await Tag.findOne({
-      tagName: tag,
-    });
-    console.log('tagObj:', tagObj);
-    if (tagObj === null) {
-      return {};
-    }
-    return tagObj._id;
-  } catch (err) {
-    console.log(err);
-    return {};
-  }
-};
-
-const createTag = async (tag) => {
-  const slug = stringToSlug(tag);
-  const newTag = new Tag({
-    tagName: tag,
-    slug,
-    howManyViewed: 0,
-    description: 'Description',
-    seo: {
-      title: tag,
-      slug,
-      description: 'Seo Description',
-    },
-  });
-  const newTagCreated = await newTag.save();
-  return newTagCreated._id;
-};
-
-const stringToSlug = (string) => {
-  return slugify(string).toLowerCase();
-};
+});
 
 // Check if Podcast slug is valid
-app.get('/validation/slug/:slug', (req, res) => {
+router.get('/validation/slug/:slug', (req, res) => {
   const { slug } = req.params;
   const verificationRes = verifyValidSlug(slug);
   res.json({
@@ -114,7 +68,7 @@ app.get('/validation/slug/:slug', (req, res) => {
   });
 });
 
-app.post('/publish', async (req, res) => {
+router.post('/publish', async (req, res) => {
   const {
     userId,
     bannerName,
@@ -128,7 +82,12 @@ app.post('/publish', async (req, res) => {
   console.log(bannerName, description, promotions, seo, featured, organization);
 
   try {
-    const slug = slugify(bannerName).toLowerCase();
+    let slug = slugifyString(bannerName);
+
+    if (!(await verifyValidSlug(slug))) {
+      slug = await generateRandomSlug(slug);
+    }
+
     if (await verifyValidSlug(slug)) {
       const promisesCategories = organization.categories.map(
         async (category) => {
@@ -186,7 +145,7 @@ app.post('/publish', async (req, res) => {
   }
 });
 
-app.post('/set/global-variable', async (req, res) => {
+router.post('/set/global-variable', async (req, res) => {
   const { type, title } = req.body;
   global.gConfigMulter.type = type;
   global.gConfigMulter.title = title;
@@ -200,7 +159,7 @@ app.post('/set/global-variable', async (req, res) => {
 // Update Podcast Info
 
 // Delete Podcast
-app.delete('/delete/banner/:bannerId', async (req, res) => {
+router.delete('/delete/banner/:bannerId', async (req, res) => {
   const { bannerId } = req.params;
 
   try {
@@ -225,7 +184,7 @@ app.delete('/delete/banner/:bannerId', async (req, res) => {
 });
 
 // Update Podcast Info
-app.put('/update/:id', async (req, res) => {
+router.put('/update/:id', async (req, res) => {
   const {
     bannerName,
     description,
@@ -236,53 +195,79 @@ app.put('/update/:id', async (req, res) => {
   } = req.body;
   const { id } = req.params;
 
-  const slug = stringToSlug(bannerName);
-
   try {
-    let categoryObj = await getCategory(organization.category);
+    let slug = slugifyString(bannerName);
 
-    if (_.isEmpty(categoryObj)) {
-      categoryObj = await createCategory(organization.category);
+    if (!(await verifyValidSlug(slug))) {
+      slug = await generateRandomSlug(slug);
     }
+    if (await verifyValidSlug(slug)) {
+      const promisesCategories = organization.categories.map(
+        async (category) => {
+          let categoryObj = await getCategory(category);
 
-    await Banner.findOneAndUpdate(
-      {
+          if (_.isEmpty(categoryObj)) {
+            categoryObj = await createCategory(category);
+          }
+          return categoryObj;
+        }
+      );
+
+      const resultsAsyncCategoriesArray = await Promise.all(promisesCategories);
+
+      const promisesTags = organization.tags.map(async (tag) => {
+        let tagObj = await getTag(tag);
+
+        if (_.isEmpty(tagObj)) {
+          tagObj = await createTag(tag);
+        }
+        return tagObj;
+      });
+
+      const resultsAsyncTagsArray = await Promise.all(promisesTags);
+
+      await Banner.findOneAndUpdate(
+        {
+          _id: id,
+        },
+        {
+          bannerName: bannerName,
+          slug: slug,
+          description: description,
+          promotions: promotions,
+          featured: featured,
+          seo: {
+            title: seo.title,
+            slug: seo.slug,
+            description: seo.description,
+          },
+          organization: {
+            categories: resultsAsyncCategoriesArray,
+            tags: resultsAsyncTagsArray,
+          },
+          updatedOn: Date.now(),
+        },
+        {
+          runValidators: true,
+        }
+      );
+
+      const newUpdatedBanner = await Banner.findOne({
         _id: id,
-      },
-      {
-        bannerName: bannerName,
-        slug: slug,
-        description: description,
-        promotions: promotions,
-        featured: featured,
-        seo: {
-          title: seo.title,
-          slug: seo.slug,
-          description: seo.description,
-        },
-        organization: {
-          category: categoryObj,
-          tags: organization.tags,
-        },
-      },
-      {
-        runValidators: true,
-      }
-    );
-
-    const newUpdatedBanner = await Banner.findOne({
-      _id: id,
-    });
-    res.status(200).send({
-      slug: newUpdatedBanner.slug,
-    });
+      });
+      res.status(200).send({
+        slug: newUpdatedBanner.slug,
+      });
+    } else {
+      res.json({ error: 'The provided slug is invalid' });
+    }
   } catch (err) {
     console.log(err);
   }
 });
 
 // Delete Podcast
-app.delete('/delete/:id', (req, res) => {
+router.delete('/delete/:id', (req, res) => {
   const { id } = req.params;
   Product.deleteOne({
     id,
@@ -299,7 +284,7 @@ app.delete('/delete/:id', (req, res) => {
     });
 });
 
-app.delete('/delete/cover/:id', async (req, res) => {
+router.delete('/delete/cover/:id', async (req, res) => {
   const { id } = req.params;
   const coverFile = await ProductMedia.findOne({
     _id: id,
@@ -312,7 +297,7 @@ app.delete('/delete/cover/:id', async (req, res) => {
   });
 });
 
-app.get('/panel/get/:slug', (req, res) => {
+router.get('/panel/get/:slug', (req, res) => {
   const { slug } = req.params;
   Banner.findOne({
     slug,
@@ -333,4 +318,29 @@ app.get('/panel/get/:slug', (req, res) => {
     });
 });
 
-module.exports = app;
+router.get('/:slug', (req, res) => {
+  const { slug } = req.params;
+  Banner.findOne({
+    slug,
+  })
+    .populate({
+      path: 'promotions',
+      model: Promotion,
+    })
+    .populate({
+      path: 'organization.categories',
+      model: Category,
+    })
+    .populate({
+      path: 'organization.tags',
+      model: Tag,
+    })
+    .then((banner) => {
+      res.json(banner);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+module.exports = router;

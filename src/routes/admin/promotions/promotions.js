@@ -1,21 +1,26 @@
 const express = require('express');
 
-const app = express();
-const cors = require('cors');
+const router = express.Router();
 const uuidv4 = require('uuid/v4');
 const multer = require('multer');
 const multerConfig = require('../../../config/multerPromotion');
 const slugify = require('slugify');
 const _ = require('lodash');
 
-const authMiddleware = require('../../../middleware/auth');
-
-app.use(cors());
-// app.use(authMiddleware);
+const {
+  slugifyString,
+  generateRandomSlug,
+} = require('../../../utils/strings/slug');
+const {
+  getCategory,
+  createCategory,
+} = require('../../../utils/categories/categories');
+const { getTag, createTag } = require('../../../utils/tags/tags');
 
 const Promotion = require('../../../models/promotion/Promotion');
 const PromotionMedia = require('../../../models/promotion/PromotionMedia');
 const Product = require('../../../models/product/Product');
+const Bundle = require('../../../models/bundle/Bundle');
 const ProductMedia = require('../../../models/product/ProductMedia');
 const Category = require('../../../models/category/Category');
 const Tag = require('../../../models/tag/Tag');
@@ -36,77 +41,7 @@ const verifyValidSlug = async (slug) => {
   }
 };
 
-const stringToSlug = (string) => {
-  return slugify(string).toLowerCase();
-};
-
-const getCategory = async (category) => {
-  try {
-    const categoryObj = await Category.findOne({
-      categoryName: category,
-    });
-    console.log('categoryObj:', categoryObj);
-    if (categoryObj === null) {
-      return {};
-    }
-    return categoryObj._id;
-  } catch (err) {
-    console.log(err);
-    return {};
-  }
-};
-
-const createCategory = async (category) => {
-  const slug = stringToSlug(category);
-  const newCategory = new Category({
-    categoryName: category,
-    slug,
-    howManyViewed: 0,
-    description: 'Description',
-    seo: {
-      title: category,
-      slug,
-      description: 'Seo Description',
-    },
-  });
-  const newCategoryCreated = await newCategory.save();
-  return newCategoryCreated._id;
-};
-
-const getTag = async (tag) => {
-  try {
-    const tagObj = await Tag.findOne({
-      tagName: tag,
-    });
-    console.log('tagObj:', tagObj);
-    if (tagObj === null) {
-      return {};
-    }
-    return tagObj._id;
-  } catch (err) {
-    console.log(err);
-    return {};
-  }
-};
-
-const createTag = async (tag) => {
-  const slug = stringToSlug(tag);
-  const newTag = new Tag({
-    tagName: tag,
-    slug,
-    howManyViewed: 0,
-    description: 'Description',
-    seo: {
-      title: tag,
-      slug,
-      description: 'Seo Description',
-    },
-  });
-  const newTagCreated = await newTag.save();
-  return newTagCreated._id;
-};
-
-app.get('/get/all', async (req, res) => {
+router.get('', async (req, res) => {
   Promotion.find()
     .populate({
       path: 'media',
@@ -121,7 +56,22 @@ app.get('/get/all', async (req, res) => {
     });
 });
 
-app.get('/get/slug/:slug', async (req, res) => {
+router.get('/get/all', async (req, res) => {
+  Promotion.find()
+    .populate({
+      path: 'media',
+      model: PromotionMedia,
+    })
+    .then((promotions) => {
+      console.log('promotions:', promotions);
+      res.status(200).send(promotions);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+router.get('/get/slug/:slug', async (req, res) => {
   const { slug } = req.params;
   Promotion.findOne({
     slug: slug,
@@ -143,8 +93,63 @@ app.get('/get/slug/:slug', async (req, res) => {
     });
 });
 
+router.get('/:slug', (req, res) => {
+  const { slug } = req.params;
+
+  Promotion.findOne({
+    slug: slug,
+  })
+    .populate({
+      path: 'media',
+      model: PromotionMedia,
+    })
+    .populate({
+      path: 'products',
+      model: Product,
+      populate: {
+        path: 'media',
+        model: ProductMedia,
+      },
+    })
+    .populate({
+      path: 'bundles',
+      model: Bundle,
+      populate: {
+        path: 'products',
+        model: Product,
+        populate: {
+          path: 'media',
+          model: ProductMedia,
+        },
+      },
+    })
+    .populate({
+      path: 'organization.categories',
+      model: Category,
+    })
+    .populate({
+      path: 'organization.tags',
+      model: Tag,
+    })
+    .then((bundle) => {
+      console.log('bundle found:', bundle);
+      const errors = [];
+      if (!bundle) errors.push({ error: 'Bundle not found' });
+
+      if (errors.length > 0) {
+        res.status(400).send(errors);
+      } else {
+        res.status(200).send(bundle);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(400).send({ error: 'Server error' });
+    });
+});
+
 // Check if Podcast slug is valid
-app.get('/validation/slug/:slug', (req, res) => {
+router.get('/validation/slug/:slug', (req, res) => {
   const { slug } = req.params;
   const verificationRes = verifyValidSlug(slug);
   res.json({
@@ -152,7 +157,7 @@ app.get('/validation/slug/:slug', (req, res) => {
   });
 });
 
-app.post('/publish', async (req, res) => {
+router.post('/publish', async (req, res) => {
   const {
     userId,
     isSlugValid,
@@ -166,7 +171,12 @@ app.post('/publish', async (req, res) => {
   } = req.body;
 
   try {
-    const slug = slugify(promotionName).toLowerCase();
+    let slug = slugifyString(bundleName);
+
+    if (!(await verifyValidSlug(slug))) {
+      slug = await generateRandomSlug(slug);
+    }
+
     if (await verifyValidSlug(slug)) {
       const promisesCategories = organization.categories.map(
         async (category) => {
@@ -225,7 +235,7 @@ app.post('/publish', async (req, res) => {
   }
 });
 
-app.post(
+router.post(
   '/publish/media',
   multer(multerConfig).single('file'),
   async (req, res) => {
@@ -246,7 +256,7 @@ app.post(
   }
 );
 
-app.post('/set/global-variable', async (req, res) => {
+router.post('/set/global-variable', async (req, res) => {
   const { type, title } = req.body;
   global.gConfigMulter.type = type;
   global.gConfigMulter.title = title;
@@ -258,18 +268,26 @@ app.post('/set/global-variable', async (req, res) => {
 });
 
 // Update Podcast Info
-app.put('/update/:id', async (req, res) => {
+router.put('/update/:id', async (req, res) => {
   const {
     media,
     promotionName,
     description,
     products,
+    bundles,
     seo,
     organization,
   } = req.body;
   const { id } = req.params;
 
-  const slug = stringToSlug(promotionName);
+  let slug = slugifyString(promotionName);
+
+  if (!(await verifyValidSlug(slug))) {
+    slug = await generateRandomSlug(slug);
+  }
+
+  if (await verifyValidSlug(slug)) {
+  }
 
   try {
     let newMedia = [];
@@ -288,10 +306,27 @@ app.put('/update/:id', async (req, res) => {
       }
     }
 
-    let categoryObj = await getCategory(organization.category);
-    if (_.isEmpty(categoryObj)) {
-      categoryObj = await createCategory(organization.category);
-    }
+    const promisesCategories = organization.categories.map(async (category) => {
+      let categoryObj = await getCategory(category);
+
+      if (_.isEmpty(categoryObj)) {
+        categoryObj = await createCategory(category);
+      }
+      return categoryObj;
+    });
+
+    const resultsAsyncCategoriesArray = await Promise.all(promisesCategories);
+
+    const promisesTags = organization.tags.map(async (tag) => {
+      let tagObj = await getTag(tag);
+
+      if (_.isEmpty(tagObj)) {
+        tagObj = await createTag(tag);
+      }
+      return tagObj;
+    });
+
+    const resultsAsyncTagsArray = await Promise.all(promisesTags);
 
     await Promotion.findOneAndUpdate(
       {
@@ -303,15 +338,17 @@ app.put('/update/:id', async (req, res) => {
         slug: slug,
         description: description,
         products: products,
+        bundles: bundles,
         seo: {
           title: seo.title,
           slug: seo.slug,
           description: seo.description,
         },
         organization: {
-          category: categoryObj,
-          tags: organization.tags,
+          categories: resultsAsyncCategoriesArray,
+          tags: resultsAsyncTagsArray,
         },
+        updatedOn: Date.now(),
       },
       {
         runValidators: true,
@@ -330,7 +367,7 @@ app.put('/update/:id', async (req, res) => {
 });
 
 // Delete Podcast
-app.delete('/delete/promotion/:promotionId', async (req, res) => {
+router.delete('/delete/promotion/:promotionId', async (req, res) => {
   const { promotionId } = req.params;
 
   try {
@@ -351,7 +388,7 @@ app.delete('/delete/promotion/:promotionId', async (req, res) => {
 });
 
 // Delete Podcast
-app.delete('/delete/:id', (req, res) => {
+router.delete('/delete/:id', (req, res) => {
   const { id } = req.params;
   Product.deleteOne({
     id,
@@ -368,7 +405,7 @@ app.delete('/delete/:id', (req, res) => {
     });
 });
 
-app.delete('/delete/cover/:id', async (req, res) => {
+router.delete('/delete/cover/:id', async (req, res) => {
   const { id } = req.params;
   const coverFile = await PromotionMedia.findOne({
     _id: id,
@@ -381,7 +418,7 @@ app.delete('/delete/cover/:id', async (req, res) => {
   });
 });
 
-app.get('/panel/get/:slug', (req, res) => {
+router.get('/panel/get/:slug', (req, res) => {
   const { slug } = req.params;
   Promotion.findOne({
     slug,
@@ -410,4 +447,4 @@ app.get('/panel/get/:slug', (req, res) => {
     });
 });
 
-module.exports = app;
+module.exports = router;

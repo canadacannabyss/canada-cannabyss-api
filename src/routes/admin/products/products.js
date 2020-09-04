@@ -2,10 +2,20 @@ const express = require('express');
 
 const router = express.Router();
 const uuidv4 = require('uuid/v4');
-const multer = require('multer');
-const multerConfig = require('../../../config/multer');
-const slugify = require('slugify');
 const _ = require('lodash');
+const multer = require('multer');
+
+const multerConfig = require('../../../config/multer');
+
+const {
+  slugifyString,
+  generateRandomSlug,
+} = require('../../../utils/strings/slug');
+const {
+  getCategory,
+  createCategory,
+} = require('../../../utils/categories/categories');
+const { getTag, createTag } = require('../../../utils/tags/tags');
 
 const Product = require('../../../models/product/Product');
 const ProductMedia = require('../../../models/product/ProductMedia');
@@ -29,102 +39,6 @@ const verifyValidSlug = async (slug) => {
   }
 };
 
-const verifyValidSlugCategory = async (slug) => {
-  try {
-    const category = await Category.find({
-      slug,
-    });
-    console.log('category:', category);
-    if (!_.isEmpty(category)) {
-      return false;
-    } else {
-      return true;
-    }
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-const convertNameToSlug = (name) => {
-  return slugify(name.toLowerCase());
-};
-
-const generateRandomSlug = async (slug) => {
-  const id = uuidv4();
-  const generatedNewSlug = `${slug}-${id}`;
-  return generatedNewSlug;
-};
-
-const stringToSlug = (string) => {
-  return slugify(string).toLowerCase();
-};
-
-const getCategory = async (category) => {
-  try {
-    const categoryObj = await Category.findOne({
-      categoryName: category,
-    });
-    console.log('categoryObj:', categoryObj);
-    if (categoryObj === null) {
-      return {};
-    }
-    return categoryObj._id;
-  } catch (err) {
-    console.log(err);
-    return {};
-  }
-};
-
-const createCategory = async (category) => {
-  const slug = stringToSlug(category);
-  const newCategory = new Category({
-    categoryName: category,
-    slug,
-    howManyViewed: 0,
-    description: 'Description',
-    seo: {
-      title: category,
-      slug,
-      description: 'Seo Description',
-    },
-  });
-  const newCategoryCreated = await newCategory.save();
-  return newCategoryCreated._id;
-};
-
-const getTag = async (tag) => {
-  try {
-    const tagObj = await Tag.findOne({
-      tagName: tag,
-    });
-    console.log('tagObj:', tagObj);
-    if (tagObj === null) {
-      return {};
-    }
-    return tagObj._id;
-  } catch (err) {
-    console.log(err);
-    return {};
-  }
-};
-
-const createTag = async (tag) => {
-  const slug = stringToSlug(tag);
-  const newTag = new Tag({
-    tagName: tag,
-    slug,
-    howManyViewed: 0,
-    description: 'Description',
-    seo: {
-      title: tag,
-      slug,
-      description: 'Seo Description',
-    },
-  });
-  const newTagCreated = await newTag.save();
-  return newTagCreated._id;
-};
-
 router.get('', async (req, res) => {
   Product.find()
     .populate({
@@ -132,7 +46,6 @@ router.get('', async (req, res) => {
       model: ProductMedia,
     })
     .then((products) => {
-      console.log('products:', products);
       res.status(200).send(products);
     })
     .catch((err) => {
@@ -191,8 +104,8 @@ router.post('/publish', async (req, res) => {
     organization,
   } = req.body;
 
-  let slug = stringToSlug(productName);
-  console.log('promised slug:', slug);
+  let slug = slugifyString(productName);
+
   if (!(await verifyValidSlug(slug))) {
     slug = await generateRandomSlug(slug);
   }
@@ -321,10 +234,11 @@ router.put('/update/:id', async (req, res) => {
   } = req.body;
   const { id } = req.params;
 
-  console.log('variants updated:', variants);
+  let slug = slugifyString(productName);
 
-  const slug = stringToSlug(productName);
-
+  if (!(await verifyValidSlug(slug))) {
+    slug = await generateRandomSlug(slug);
+  }
   try {
     let newMedia = [];
     const productObj = await Product.findOne({

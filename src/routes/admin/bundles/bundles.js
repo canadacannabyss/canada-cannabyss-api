@@ -1,12 +1,22 @@
 const express = require('express');
 
 const router = express.Router();
-const cors = require('cors');
+
 const uuidv4 = require('uuid/v4');
+
 const multer = require('multer');
 const multerConfig = require('../../../config/multer');
-const slugify = require('slugify');
 const _ = require('lodash');
+
+const {
+  slugifyString,
+  generateRandomSlug,
+} = require('../../../utils/strings/slug');
+const {
+  getCategory,
+  createCategory,
+} = require('../../../utils/categories/categories');
+const { getTag, createTag } = require('../../../utils/tags/tags');
 
 const Bundle = require('../../../models/bundle/Bundle');
 const Category = require('../../../models/category/Category');
@@ -31,82 +41,6 @@ const verifyValidSlug = async (slug) => {
   }
 };
 
-const generateRandomSlug = async (slug) => {
-  const id = uuidv4();
-  const generatedNewSlug = `${slug}-${id}`;
-  return generatedNewSlug;
-};
-
-const stringToSlug = (string) => {
-  return slugify(string).toLowerCase();
-};
-
-const getCategory = async (category) => {
-  try {
-    const categoryObj = await Category.findOne({
-      categoryName: category,
-    });
-    console.log('categoryObj:', categoryObj);
-    if (categoryObj === null) {
-      return {};
-    }
-    return categoryObj._id;
-  } catch (err) {
-    console.log(err);
-    return {};
-  }
-};
-
-const createCategory = async (category) => {
-  const slug = stringToSlug(category);
-  const newCategory = new Category({
-    categoryName: category,
-    slug,
-    howManyViewed: 0,
-    description: 'Description',
-    seo: {
-      title: category,
-      slug,
-      description: 'Seo Description',
-    },
-  });
-  const newCategoryCreated = await newCategory.save();
-  return newCategoryCreated._id;
-};
-
-const getTag = async (tag) => {
-  try {
-    const tagObj = await Tag.findOne({
-      tagName: tag,
-    });
-    console.log('tagObj:', tagObj);
-    if (tagObj === null) {
-      return {};
-    }
-    return tagObj._id;
-  } catch (err) {
-    console.log(err);
-    return {};
-  }
-};
-
-const createTag = async (tag) => {
-  const slug = stringToSlug(tag);
-  const newTag = new Tag({
-    tagName: tag,
-    slug,
-    howManyViewed: 0,
-    description: 'Description',
-    seo: {
-      title: tag,
-      slug,
-      description: 'Seo Description',
-    },
-  });
-  const newTagCreated = await newTag.save();
-  return newTagCreated._id;
-};
-
 router.get('', async (req, res) => {
   Bundle.find()
     .populate({
@@ -117,12 +51,8 @@ router.get('', async (req, res) => {
         model: ProductMedia,
       },
     })
-    .populate({
-      path: 'organization.category',
-      model: Category,
-    })
-    .then((product) => {
-      res.status(200).send(product);
+    .then((bundles) => {
+      res.status(200).send(bundles);
     })
     .catch((err) => {
       console.error(err);
@@ -157,8 +87,6 @@ router.get('/panel/get/:slug', (req, res) => {
 router.get('/:slug', (req, res) => {
   const { slug } = req.params;
 
-  console.log('slug:', slug);
-
   Bundle.findOne({
     slug: slug,
   })
@@ -169,6 +97,14 @@ router.get('/:slug', (req, res) => {
         path: 'media',
         model: ProductMedia,
       },
+    })
+    .populate({
+      path: 'organization.categories',
+      model: Category,
+    })
+    .populate({
+      path: 'organization.tags',
+      model: Tag,
     })
     .then((bundle) => {
       console.log('bundle found:', bundle);
@@ -213,8 +149,8 @@ router.post('/publish', async (req, res) => {
     organization,
   } = req.body;
 
-  let slug = stringToSlug(bundleName);
-  console.log('promised slug:', slug);
+  let slug = slugifyString(bundleName);
+
   if (!(await verifyValidSlug(slug))) {
     slug = await generateRandomSlug(slug);
   }
@@ -333,67 +269,94 @@ router.put('/update/:id', async (req, res) => {
   } = req.body;
   const { id } = req.params;
 
-  const slug = stringToSlug(bundleName);
+  let slug = slugifyString(bundleName);
 
-  try {
-    let categoryObj = await getCategory(organization.category);
-    if (_.isEmpty(categoryObj)) {
-      categoryObj = await createCategory(organization.category);
-    }
+  if (!(await verifyValidSlug(slug))) {
+    slug = await generateRandomSlug(slug);
+  }
 
-    await Bundle.findOneAndUpdate(
-      {
-        _id: id,
-      },
-      {
-        products: products,
-        variants: variants,
-        bundleName: bundleName,
-        slug: slug,
-        prices: {
-          price: prices.price,
-          compareTo: prices.compareTo,
+  if (await verifyValidSlug(slug)) {
+    try {
+      const promisesCategories = organization.categories.map(
+        async (category) => {
+          let categoryObj = await getCategory(category);
+
+          if (_.isEmpty(categoryObj)) {
+            categoryObj = await createCategory(category);
+          }
+          return categoryObj;
+        }
+      );
+
+      const resultsAsyncCategoriesArray = await Promise.all(promisesCategories);
+
+      const promisesTags = organization.tags.map(async (tag) => {
+        let tagObj = await getTag(tag);
+
+        if (_.isEmpty(tagObj)) {
+          tagObj = await createTag(tag);
+        }
+        return tagObj;
+      });
+
+      const resultsAsyncTagsArray = await Promise.all(promisesTags);
+
+      await Bundle.findOneAndUpdate(
+        {
+          _id: id,
         },
-        taxableBundle: taxableBundle,
-        description: description,
-        extraInfo: extraInfo,
-        inventory: {
-          sku: inventory.sku,
-          barcode: inventory.barcode,
-          quantity: inventory.quantity,
-          allowPurchaseOutOfStock: inventory.allowPurchaseOutOfStock,
-        },
-        shipping: {
-          physicalProduct: shipping.physicalProduct,
-          weight: {
-            unit: shipping.weight.unit,
-            amount: shipping.weight.amount,
+        {
+          products: products,
+          variants: variants,
+          bundleName: bundleName,
+          slug: slug,
+          prices: {
+            price: prices.price,
+            compareTo: prices.compareTo,
           },
+          taxableBundle: taxableBundle,
+          description: description,
+          extraInfo: extraInfo,
+          inventory: {
+            sku: inventory.sku,
+            barcode: inventory.barcode,
+            quantity: inventory.quantity,
+            allowPurchaseOutOfStock: inventory.allowPurchaseOutOfStock,
+          },
+          shipping: {
+            physicalProduct: shipping.physicalProduct,
+            weight: {
+              unit: shipping.weight.unit,
+              amount: shipping.weight.amount,
+            },
+          },
+          seo: {
+            title: seo.title,
+            slug: seo.slug,
+            description: seo.description,
+          },
+          organization: {
+            categories: resultsAsyncCategoriesArray,
+            tags: resultsAsyncTagsArray,
+          },
+          updatedOn: Date.now(),
         },
-        seo: {
-          title: seo.title,
-          slug: seo.slug,
-          description: seo.description,
-        },
-        organization: {
-          category: categoryObj,
-          tags: organization.tags,
-        },
-        updatedOn: Date.now(),
-      },
-      {
-        runValidators: true,
-      }
-    );
+        {
+          runValidators: true,
+        }
+      );
 
-    const newUpdatedBundle = await Bundle.findOne({
-      _id: id,
-    });
-    res.status(200).send({
-      slug: newUpdatedBundle.slug,
-    });
-  } catch (err) {
-    console.log(err);
+      const newUpdatedBundle = await Bundle.findOne({
+        _id: id,
+      });
+      res.status(200).send({
+        slug: newUpdatedBundle.slug,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  } else {
+    res.json({ error: 'The provided slug is invalid' });
   }
 });
 

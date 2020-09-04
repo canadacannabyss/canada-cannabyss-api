@@ -21,6 +21,7 @@ const User = require('../models/user/User');
 const UserProfileImage = require('../models/user/UserProfileImage');
 const Category = require('../models/category/Category');
 const CategoryMedia = require('../models/category/CategoryMedia');
+const Tag = require('../models/tag/Tag');
 
 app.get('', async (req, res) => {
   const page = parseInt(req.query.page);
@@ -124,6 +125,14 @@ app.get('/get/bundle/:slug', (req, res) => {
         path: 'media',
         model: ProductMedia,
       },
+    })
+    .populate({
+      path: 'organization.categories',
+      model: Category,
+    })
+    .populate({
+      path: 'organization.tags',
+      model: Tag,
     })
     .then((product) => {
       res.json(product);
