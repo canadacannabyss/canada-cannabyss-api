@@ -389,16 +389,8 @@ router.delete('/delete/bundle/:bundleId', async (req, res) => {
     });
 
     bundleObj.remove();
-    const allBundles = await Bundle.find().populate({
-      path: 'products',
-      model: Product,
-      populate: {
-        path: 'media',
-        model: ProductMedia,
-      },
-    });
-    console.log(allBundles);
-    res.status(200).send(allBundles);
+
+    res.status(200).send({ ok: true });
   } catch (err) {
     console.log(err);
   }

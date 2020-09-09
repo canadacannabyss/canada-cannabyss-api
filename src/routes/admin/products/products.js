@@ -393,12 +393,7 @@ router.delete('/delete/product/:productId', async (req, res) => {
       await productMediaObj.remove();
     });
     productObj.remove();
-    const allProducts = await Product.find().populate({
-      path: 'media',
-      model: ProductMedia,
-    });
-    console.log(allProducts);
-    res.status(200).send(allProducts);
+    res.status(200).send({ ok: true });
   } catch (err) {
     console.log(err);
   }

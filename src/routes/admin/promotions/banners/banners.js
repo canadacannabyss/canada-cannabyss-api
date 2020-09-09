@@ -156,8 +156,6 @@ router.post('/set/global-variable', async (req, res) => {
   });
 });
 
-// Update Podcast Info
-
 // Delete Podcast
 router.delete('/delete/banner/:bannerId', async (req, res) => {
   const { bannerId } = req.params;
@@ -168,16 +166,8 @@ router.delete('/delete/banner/:bannerId', async (req, res) => {
     });
 
     bannerObj.remove();
-    const allBanners = await Banner.find().populate({
-      path: 'promotions',
-      model: Promotion,
-      populate: {
-        path: 'media',
-        model: PromotionMedia,
-      },
-    });
 
-    res.status(200).send(allBanners);
+    res.status(200).send({ ok: true });
   } catch (err) {
     console.log(err);
   }

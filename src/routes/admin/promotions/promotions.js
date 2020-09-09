@@ -171,7 +171,7 @@ router.post('/publish', async (req, res) => {
   } = req.body;
 
   try {
-    let slug = slugifyString(bundleName);
+    let slug = slugifyString(promotionName);
 
     if (!(await verifyValidSlug(slug))) {
       slug = await generateRandomSlug(slug);
@@ -372,13 +372,11 @@ router.delete('/delete/promotion/:promotionId', async (req, res) => {
       _id: promotionId,
     });
 
-    promotionObj.remove();
-    const allPromotions = await Promotion.find().populate({
-      path: 'media',
-      model: PromotionMedia,
-    });
+    console.log('promotion deletion:', promotionObj);
 
-    res.status(200).send(allPromotions);
+    promotionObj.remove();
+
+    res.status(200).send({ ok: true });
   } catch (err) {
     console.log(err);
   }

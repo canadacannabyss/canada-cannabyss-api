@@ -264,9 +264,7 @@ router.delete('/delete/coupon/:couponId', async (req, res) => {
       _id: couponId,
     });
     productObj.remove();
-    const allCoupons = await Coupon.find();
-    console.log(allCoupons);
-    res.status(200).send(allCoupons);
+    res.status(200).send({ ok: true });
   } catch (err) {
     console.log(err);
   }

@@ -356,9 +356,8 @@ app.delete('/delete/category/:categoryId', async (req, res) => {
       categoryMediaObj.remove();
     }
     categoryObj.remove();
-    const allCategories = await Category.find();
 
-    res.status(200).send(allCategories);
+    res.status(200).send({ ok: true });
   } catch (err) {
     console.log(err);
   }
