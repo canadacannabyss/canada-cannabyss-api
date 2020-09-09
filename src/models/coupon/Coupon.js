@@ -43,12 +43,18 @@ const CouponSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  items: [
+  products: [
     {
-      _id: {
-        type: String,
-        required: true,
-      },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Product',
+      required: false,
+    },
+  ],
+  bundles: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Bundle',
+      required: false,
     },
   ],
   discount: {
@@ -62,6 +68,36 @@ const CouponSchema = new mongoose.Schema({
       required: true,
       default: 0,
     },
+  },
+  seo: {
+    title: {
+      type: String,
+      required: true,
+    },
+    slug: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+  },
+  organization: {
+    categories: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
+        required: true,
+      },
+    ],
+    tags: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Tag',
+        required: true,
+      },
+    ],
   },
   createdOn: {
     type: Date,

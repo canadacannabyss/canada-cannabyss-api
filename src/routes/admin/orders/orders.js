@@ -64,10 +64,12 @@ app.get('', async (req, res) => {
 
 app.get('/:orderId', async (req, res) => {
   const { orderId } = req.params;
+  console.log('orderId:', orderId);
   Order.findOne({
     _id: orderId,
   })
     .then((order) => {
+      console.log('order:', order);
       res.status(200).send(order);
     })
     .catch((err) => {

@@ -286,9 +286,6 @@ router.put('/update/:id', async (req, res) => {
     slug = await generateRandomSlug(slug);
   }
 
-  if (await verifyValidSlug(slug)) {
-  }
-
   try {
     let newMedia = [];
     const promotionObj = await Promotion.findOne({

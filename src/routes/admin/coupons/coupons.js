@@ -6,8 +6,16 @@ const {
   slugifyString,
   generateRandomSlug,
 } = require('../../../utils/strings/slug');
+const {
+  getCategory,
+  createCategory,
+} = require('../../../utils/categories/categories');
+const { getTag, createTag } = require('../../../utils/tags/tags');
 
 const Coupon = require('../../../models/coupon/Coupon');
+const Category = require('../../../models/category/Category');
+const CategoryMedia = require('../../../models/category/CategoryMedia');
+const Tag = require('../../../models/tag/Tag');
 
 const verifyValidSlug = async (slug) => {
   try {
@@ -56,10 +64,21 @@ router.get('/validate/couponName/:couponName', async (req, res) => {
 
 router.get('/get/coupon/:slug', async (req, res) => {
   const { slug } = req.params;
+  console.log('slug:', slug);
+
   Coupon.findOne({
     slug,
   })
+    .populate({
+      path: 'organization.categories',
+      model: Category,
+    })
+    .populate({
+      path: 'organization.tags',
+      model: Tag,
+    })
     .then((coupon) => {
+      console.log('coupon:', coupon);
       res.status(200).send(coupon);
     })
     .catch((err) => {
@@ -76,8 +95,13 @@ router.post('/create', async (req, res) => {
     availableAt,
     quantity,
     discount,
-    itemsOnCoupon,
+    seo,
+    organization,
+    products,
+    bundles,
   } = req.body;
+
+  console.log('req.body:', req.body);
 
   try {
     let slug = slugifyString(couponName);
@@ -85,37 +109,61 @@ router.post('/create', async (req, res) => {
       slug = await generateRandomSlug(slug);
     }
 
-    const newItems = [];
+    if (await verifyValidSlug(slug)) {
+      const promisesCategories = organization.categories.map(
+        async (category) => {
+          let categoryObj = await getCategory(category);
 
-    itemsOnCoupon.map((item) => {
-      newItems.push({
-        _id: item,
+          if (_.isEmpty(categoryObj)) {
+            categoryObj = await createCategory(category);
+          }
+          return categoryObj;
+        }
+      );
+
+      const resultsAsyncCategoriesArray = await Promise.all(promisesCategories);
+
+      const promisesTags = organization.tags.map(async (tag) => {
+        let tagObj = await getTag(tag);
+
+        if (_.isEmpty(tagObj)) {
+          tagObj = await createTag(tag);
+        }
+        return tagObj;
       });
-    });
 
-    const newCoupon = new Coupon({
-      couponName,
-      slug,
-      description,
-      availableAt,
-      featured,
-      freeShipping,
-      quantity,
-      items: newItems,
-      discount: {
-        type: discount.type,
-        amount: discount.amount,
-      },
-    });
+      const resultsAsyncTagsArray = await Promise.all(promisesTags);
 
-    newCoupon
-      .save()
-      .then(() => {
-        res.status(200).send({ ok: true });
-      })
-      .catch((err) => {
-        console.error(err);
+      const newCoupon = new Coupon({
+        couponName,
+        slug,
+        description,
+        availableAt,
+        featured,
+        freeShipping,
+        quantity,
+        products,
+        bundles,
+        seo,
+        organization: {
+          categories: resultsAsyncCategoriesArray,
+          tags: resultsAsyncTagsArray,
+        },
+        discount: {
+          type: discount.type,
+          amount: discount.amount,
+        },
       });
+
+      newCoupon
+        .save()
+        .then(() => {
+          res.status(200).send({ ok: true });
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
   } catch (err) {
     console.error(err);
   }
@@ -128,16 +176,43 @@ router.put('/edit', async (req, res) => {
     description,
     featured,
     freeShipping,
-    quantity,
     availableAt,
+    quantity,
     discount,
+    seo,
+    organization,
+    products,
+    bundles,
   } = req.body;
 
   try {
     let slug = slugifyString(couponName);
+
     if (!(await verifyValidSlug(slug))) {
       slug = await generateRandomSlug(slug);
     }
+
+    const promisesCategories = organization.categories.map(async (category) => {
+      let categoryObj = await getCategory(category);
+
+      if (_.isEmpty(categoryObj)) {
+        categoryObj = await createCategory(category);
+      }
+      return categoryObj;
+    });
+
+    const resultsAsyncCategoriesArray = await Promise.all(promisesCategories);
+
+    const promisesTags = organization.tags.map(async (tag) => {
+      let tagObj = await getTag(tag);
+
+      if (_.isEmpty(tagObj)) {
+        tagObj = await createTag(tag);
+      }
+      return tagObj;
+    });
+
+    const resultsAsyncTagsArray = await Promise.all(promisesTags);
 
     Coupon.findOneAndUpdate(
       {
@@ -151,10 +226,18 @@ router.put('/edit', async (req, res) => {
         featured,
         freeShipping,
         quantity,
+        products,
+        bundles,
+        seo,
+        organization: {
+          categories: resultsAsyncCategoriesArray,
+          tags: resultsAsyncTagsArray,
+        },
         discount: {
           type: discount.type,
           amount: discount.amount,
         },
+        updatedOn: Date.now(),
       },
       {
         runValidators: true,

@@ -69,6 +69,7 @@ app.use('/bundles', require('./routes/bundles'));
 app.use('/categories', require('./routes/categories'));
 app.use('/customers', require('./routes/customers/customers'));
 app.use('/resellers', require('./routes/resellers'));
+
 app.use('/customers/cart', require('./routes/customers/cart/cart'));
 app.use('/customers/order', require('./routes/customers/order/order'));
 app.use('/customers/orders', require('./routes/customers/orders/orders'));
@@ -83,6 +84,7 @@ app.use(
   '/customers/recommended',
   require('./routes/customers/recommended/recommended')
 );
+
 app.use('/admin/products', require('./routes/admin/products/products'));
 app.use('/admin/bundles', require('./routes/admin/bundles/bundles'));
 app.use('/admin/promotions', require('./routes/admin/promotions/promotions'));
@@ -91,9 +93,11 @@ app.use(
   require('./routes/admin/promotions/banners/banners')
 );
 app.use('/admin/category', require('./routes/admin/category/category'));
+app.use('/admin/categories', require('./routes/admin/categories/categories'));
 app.use('/admin/orders', require('./routes/admin/orders/orders'));
 app.use('/admin/coupons', require('./routes/admin/coupons/coupons'));
 app.use('/admin', require('./routes/admin/index'));
+
 app.use('/addresses', require('./routes/addresses/addresses'));
 
 const port = process.env.PORT || global.gConfig.node_port;

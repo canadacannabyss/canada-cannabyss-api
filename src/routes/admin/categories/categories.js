@@ -1,17 +1,11 @@
 const express = require('express');
 
-const app = express();
-const cors = require('cors');
+const router = express.Router();
 const uuidv4 = require('uuid/v4');
 const multer = require('multer');
 const multerConfig = require('../../../config/multerCategory');
 const slugify = require('slugify');
 const _ = require('lodash');
-
-const authMiddleware = require('../../../middleware/auth');
-
-app.use(cors());
-// app.use(authMiddleware);
 
 const Category = require('../../../models/category/Category');
 const CategoryMedia = require('../../../models/category/CategoryMedia');
@@ -45,7 +39,7 @@ const convertNameToSlug = (name) => {
   return slugify(name.toLowerCase());
 };
 
-app.get('', (req, res) => {
+router.get('', (req, res) => {
   Category.find()
     .sort({
       createdOn: -1,
@@ -58,7 +52,7 @@ app.get('', (req, res) => {
     });
 });
 
-app.get('/panel/get/:slug', (req, res) => {
+router.get('/panel/get/:slug', (req, res) => {
   const { slug } = req.params;
   Category.findOne({
     slug,
@@ -75,7 +69,7 @@ app.get('/panel/get/:slug', (req, res) => {
     });
 });
 
-app.get('/sync', async (req, res) => {
+router.get('/sync', async (req, res) => {
   try {
     const categoriesObj = await Category.find();
     categoriesObj.map(async (category) => {
@@ -124,7 +118,7 @@ app.get('/sync', async (req, res) => {
 });
 
 // Check if Podcast slug is valid
-app.get('/validation/slug/:slug', (req, res) => {
+router.get('/validation/slug/:slug', (req, res) => {
   const { slug } = req.params;
   const verificationRes = verifyValidSlug(slug);
   res.json({
@@ -132,7 +126,7 @@ app.get('/validation/slug/:slug', (req, res) => {
   });
 });
 
-app.post('/publish', async (req, res) => {
+router.post('/publish', async (req, res) => {
   const {
     media,
     isSlugValid,
@@ -219,7 +213,7 @@ app.post('/publish', async (req, res) => {
   }
 });
 
-app.put('/update/:id', async (req, res) => {
+router.put('/update/:id', async (req, res) => {
   const { media, categoryName, featured, description, seo } = req.body;
   const { id } = req.params;
 
@@ -233,18 +227,18 @@ app.put('/update/:id', async (req, res) => {
     const categoryObj = await Category.findOne({
       _id: id,
     });
+
     if (media === undefined) {
       newMedia = categoryObj.media;
     } else {
       newMedia = media;
       if (categoryObj.slug !== slug) {
-        console.log('categoryObj.media:', categoryObj.media);
-        if (categoryObj.media) {
+        categoryObj.media.map(async (image) => {
           const categoryMediaObj = await CategoryMedia.findOne({
-            _id: categoryObj.media,
+            _id: image,
           });
           categoryMediaObj.remove();
-        }
+        });
       }
     }
 
@@ -280,7 +274,7 @@ app.put('/update/:id', async (req, res) => {
   }
 });
 
-app.post(
+router.post(
   '/publish/media',
   multer(multerConfig).single('file'),
   async (req, res) => {
@@ -300,7 +294,7 @@ app.post(
   }
 );
 
-app.post('/set/global-variable', async (req, res) => {
+router.post('/set/global-variable', async (req, res) => {
   const { type, title } = req.body;
   global.gConfigMulter.type = type;
   global.gConfigMulter.title = title;
@@ -312,7 +306,7 @@ app.post('/set/global-variable', async (req, res) => {
 });
 
 // Update Category Cover
-app.get('/get/cover/:id', async (req, res) => {
+router.get('/get/cover/:id', async (req, res) => {
   const { id } = req.params;
   CategoryMedia.findOne({
     _id: id,
@@ -326,7 +320,7 @@ app.get('/get/cover/:id', async (req, res) => {
 });
 
 // Update Category Cover
-app.put('/update/cover/:id', async (req, res) => {
+router.put('/update/cover/:id', async (req, res) => {
   const { id } = req.params;
   const coverFile = await CategoryMedia.findOne({
     _id: id,
@@ -340,7 +334,7 @@ app.put('/update/cover/:id', async (req, res) => {
 });
 
 // Delete Category
-app.delete('/delete/category/:categoryId', async (req, res) => {
+router.delete('/delete/category/:categoryId', async (req, res) => {
   const { categoryId } = req.params;
   console.log('categoryId:', categoryId);
 
@@ -365,7 +359,7 @@ app.delete('/delete/category/:categoryId', async (req, res) => {
 });
 
 // Delete Category Cover
-app.delete('/delete/media/:id', async (req, res) => {
+router.delete('/delete/media/:id', async (req, res) => {
   const { id } = req.params;
   const coverFile = await CategoryMedia.findOne({
     id: id,
@@ -376,4 +370,4 @@ app.delete('/delete/media/:id', async (req, res) => {
   });
 });
 
-module.exports = app;
+module.exports = router;
