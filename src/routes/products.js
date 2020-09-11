@@ -16,10 +16,19 @@ const Product = require('../models/product/Product');
 const ProductComment = require('../models/product/ProductComment');
 const ProductCommentReply = require('../models/product/ProductCommentReply');
 const ProductMedia = require('../models/product/ProductMedia');
+
 const User = require('../models/user/User');
 const UserProfileImage = require('../models/user/UserProfileImage');
+
+const Reseller = require('../models/reseller/Reseller');
+const ResellerProfileImage = require('../models/reseller/ResellerProfileImage');
+
+const Customer = require('../models/customer/Customer');
+const CustomerProfileImage = require('../models/customer/CustomerProfileImage');
+
 const Category = require('../models/category/Category');
 const CategoryMedia = require('../models/category/CategoryMedia');
+
 const Tag = require('../models/tag/Tag');
 
 app.get('', async (req, res) => {
@@ -110,11 +119,11 @@ app.get('/get/product/:slug', (req, res) => {
     slug,
   })
     .populate({
-      path: 'user',
-      model: User,
+      path: 'reseller',
+      model: Reseller,
       populate: {
         path: 'profileImage',
-        model: UserProfileImage,
+        model: ResellerProfileImage,
       },
     })
     .populate({
@@ -181,16 +190,17 @@ app.get('/get/product/:slug', (req, res) => {
           categories: product.organization.categories,
           tags: product.organization.tags,
         },
-        user: {
-          _id: product.user._id,
+        reseller: {
+          _id: product.reseller._id,
+          isCanadaCannabyssTeam: product.reseller.isCanadaCannabyssTeam,
           names: {
-            firstName: product.user.names.firstName,
-            lastName: product.user.names.lastName,
+            firstName: product.reseller.names.firstName,
+            lastName: product.reseller.names.lastName,
           },
-          username: product.user.username,
+          username: product.reseller.username,
           profileImage: {
-            name: product.user.profileImage.name,
-            url: product.user.profileImage.url,
+            name: product.reseller.profileImage.name,
+            url: product.reseller.profileImage.url,
           },
         },
         media: product.media,
@@ -217,11 +227,11 @@ app.get('/get/comments/:productId', async (req, res) => {
     product: productId,
   })
     .populate({
-      path: 'user',
-      model: User,
+      path: 'customer',
+      model: Customer,
       populate: {
         path: 'profileImage',
-        model: UserProfileImage,
+        model: CustomerProfileImage,
       },
     })
     .sort({
@@ -229,19 +239,19 @@ app.get('/get/comments/:productId', async (req, res) => {
     })
     .then((comments) => {
       comments.map((comment) => {
-        console.log('comment product:', comment.user.names.firstName);
+        console.log('comment product:', comment.customer.names.firstName);
         commentsList.push({
           replies: comment.replies,
           updatedOn: comment.updatedOn,
           _id: comment._id,
-          user: {
+          customer: {
             names: {
-              firstName: comment.user.names.firstName,
-              lastName: comment.user.names.lastName,
+              firstName: comment.customer.names.firstName,
+              lastName: comment.customer.names.lastName,
             },
-            username: comment.user.username,
+            username: comment.customer.customername,
             profileImage: {
-              url: comment.user.profileImage.url,
+              url: comment.customer.profileImage.url,
             },
           },
           content: comment.content,

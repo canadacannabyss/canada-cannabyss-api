@@ -42,7 +42,7 @@ app.post('/comment/post', async (req, res) => {
     let commentId;
     const newComment = new ProductComment({
       id,
-      user: userId,
+      customer: userId,
       product: productId,
       content,
       createdOn,

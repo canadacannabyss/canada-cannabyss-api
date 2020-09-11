@@ -98,6 +98,24 @@ app.use('/admin/orders', require('./routes/admin/orders/orders'));
 app.use('/admin/coupons', require('./routes/admin/coupons/coupons'));
 app.use('/admin', require('./routes/admin/index'));
 
+app.use('/reseller/products', require('./routes/reseller/products/products'));
+app.use('/reseller/bundles', require('./routes/reseller/bundles/bundles'));
+app.use(
+  '/reseller/promotions',
+  require('./routes/reseller/promotions/promotions')
+);
+app.use(
+  '/reseller/promotions/banners',
+  require('./routes/reseller/promotions/banners/banners')
+);
+app.use('/reseller/category', require('./routes/reseller/category/category'));
+app.use(
+  '/reseller/categories',
+  require('./routes/reseller/categories/categories')
+);
+app.use('/reseller/orders', require('./routes/reseller/orders/orders'));
+app.use('/reseller/coupons', require('./routes/reseller/coupons/coupons'));
+
 app.use('/addresses', require('./routes/addresses/addresses'));
 
 const port = process.env.PORT || global.gConfig.node_port;

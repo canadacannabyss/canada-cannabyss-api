@@ -26,7 +26,7 @@ const Tag = require('../models/tag/Tag');
 app.get('/product/products/:userId', (req, res) => {
   const { userId } = req.params;
   Product.find({
-    user: userId,
+    reseller: userId,
   })
     .populate({
       path: 'media',
