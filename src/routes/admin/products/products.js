@@ -137,7 +137,7 @@ router.post('/publish', async (req, res) => {
       const resultsAsyncTagsArray = await Promise.all(promisesTags);
 
       const newProduct = new Product({
-        user: userId,
+        reseller: userId,
         media,
         variants,
         productName,

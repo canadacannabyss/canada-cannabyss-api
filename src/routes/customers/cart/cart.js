@@ -37,7 +37,7 @@ app.post('/create/cart', async (req, res) => {
   console.log('userId:', userId);
   const newCart = new Cart({
     products: [],
-    user: userId,
+    customer: userId,
   });
 
   newCart
@@ -53,7 +53,7 @@ app.post('/create/cart', async (req, res) => {
 app.get('/get/cart/user/:userId', async (req, res) => {
   const { userId } = req.params;
   Cart.findOne({
-    user: userId,
+    customer: userId,
     paid: false,
     completed: false,
   })

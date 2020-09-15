@@ -17,9 +17,6 @@ const ProductComment = require('../models/product/ProductComment');
 const ProductCommentReply = require('../models/product/ProductCommentReply');
 const ProductMedia = require('../models/product/ProductMedia');
 
-const User = require('../models/user/User');
-const UserProfileImage = require('../models/user/UserProfileImage');
-
 const Reseller = require('../models/reseller/Reseller');
 const ResellerProfileImage = require('../models/reseller/ResellerProfileImage');
 

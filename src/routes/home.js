@@ -17,8 +17,8 @@ const ProductComment = require('../models/product/ProductComment');
 const ProductCommentReply = require('../models/product/ProductCommentReply');
 const ProductMedia = require('../models/product/ProductMedia');
 const Bundle = require('../models/bundle/Bundle');
-const User = require('../models/user/User');
-const UserProfileImage = require('../models/user/UserProfileImage');
+const Customer = require('../models/customer/Customer');
+const CustomerProfileImage = require('../models/customer/CustomerProfileImage');
 const Category = require('../models/category/Category');
 const CategoryMedia = require('../models/category/CategoryMedia');
 const Banner = require('../models/banner/Banner');
@@ -195,11 +195,11 @@ app.get('/get/comments/:productId', async (req, res) => {
     product: productId,
   })
     .populate({
-      path: 'user',
-      model: User,
+      path: 'customer',
+      model: Customer,
       populate: {
         path: 'profileImage',
-        model: UserProfileImage,
+        model: CustomerProfileImage,
       },
     })
     .sort({
@@ -211,11 +211,11 @@ app.get('/get/comments/:productId', async (req, res) => {
           replies: comment.replies,
           updatedOn: comment.updatedOn,
           _id: comment._id,
-          user: {
-            name: comment.user.name,
-            username: comment.user.username,
+          customer: {
+            name: comment.customer.name,
+            username: comment.customer.username,
             profileImage: {
-              url: comment.user.profileImage.url,
+              url: comment.customer.profileImage.url,
             },
           },
           content: comment.content,

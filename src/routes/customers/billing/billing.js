@@ -24,7 +24,7 @@ app.post('/create', async (req, res) => {
     postalCode,
   } = req.body;
   const newBilling = new Billing({
-    user,
+    customer: user,
     name,
     country,
     provinceState,
@@ -62,7 +62,7 @@ app.get('/get/all/:userId', async (req, res) => {
   const { userId } = req.params;
 
   Billing.find({
-    user: userId,
+    customer: userId,
   })
     .then((billing) => {
       res.json(billing);

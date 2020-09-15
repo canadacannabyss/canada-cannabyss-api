@@ -182,7 +182,7 @@ router.post('/publish', async (req, res) => {
       const resultsAsyncTagsArray = await Promise.all(promisesTags);
 
       const newBundle = new Bundle({
-        user: userId,
+        reseller: userId,
         products: products,
         variants,
         bundleName,

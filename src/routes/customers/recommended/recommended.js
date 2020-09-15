@@ -10,11 +10,10 @@ const Product = require('../../../models/product/Product');
 const ProductComment = require('../../../models/product/ProductComment');
 const ProductCommentReply = require('../../../models/product/ProductCommentReply');
 const ProductMedia = require('../../../models/product/ProductMedia');
+
 const Bundle = require('../../../models/bundle/Bundle');
 const BundleComment = require('../../../models/bundle/BundleComment');
 const BundleCommentReply = require('../../../models/bundle/BundleCommentReply');
-const User = require('../../../models/user/User');
-const UserProfileImage = require('../../../models/user/UserProfileImage');
 
 app.get('/products', async (req, res) => {
   //   const { userId } = req.params;

@@ -203,7 +203,7 @@ router.post('/publish', async (req, res) => {
       const resultsAsyncTagsArray = await Promise.all(promisesTags);
 
       const newPromotion = new Promotion({
-        user: userId,
+        reseller: userId,
         media,
         promotionName,
         slug,

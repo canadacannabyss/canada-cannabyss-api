@@ -7,6 +7,11 @@ var db = mongoose.createConnection(process.env.ATLAS_URI_CANADA_CANNABYSS, {
 });
 
 const CouponSchema = new mongoose.Schema({
+  reseller: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Reseller',
+    required: true,
+  },
   couponName: {
     type: String,
     required: true,

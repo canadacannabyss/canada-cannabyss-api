@@ -118,6 +118,11 @@ app.use('/reseller/coupons', require('./routes/reseller/coupons/coupons'));
 
 app.use('/addresses', require('./routes/addresses/addresses'));
 
+app.use(
+  '/cryptocurrencies',
+  require('./routes/cryptocurrencies/cryptocurrencies')
+);
+
 const port = process.env.PORT || global.gConfig.node_port;
 
 app.listen(port, () => {

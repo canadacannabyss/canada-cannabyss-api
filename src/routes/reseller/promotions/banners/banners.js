@@ -114,7 +114,7 @@ router.post('/publish', async (req, res) => {
       const resultsAsyncTagsArray = await Promise.all(promisesTags);
 
       const newBanner = new Banner({
-        user: userId,
+        reseller: userId,
         bannerName: bannerName,
         slug: slug,
         description: description,

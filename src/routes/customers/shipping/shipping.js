@@ -25,7 +25,7 @@ app.post('/create', async (req, res) => {
   } = req.body;
 
   const newShipping = new Shipping({
-    user,
+    customer: user,
     name,
     country,
     provinceState,
@@ -50,7 +50,7 @@ app.get('/get/shipping/:shippingId', async (req, res) => {
 
   Shipping.findOne({
     _id: shippingId,
-    user: userId,
+    customer: userId,
   })
     .then((shipping) => {
       res.json(shipping);
@@ -64,7 +64,7 @@ app.get('/get/all/:userId', async (req, res) => {
   const { userId } = req.params;
 
   Shipping.find({
-    user: userId,
+    customer: userId,
   })
     .then((shipping) => {
       res.json(shipping);

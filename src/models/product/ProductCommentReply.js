@@ -23,7 +23,7 @@ const PostCommentReplySchema = new mongoose.Schema({
   },
   author: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Customer',
     required: true,
   },
   content: {

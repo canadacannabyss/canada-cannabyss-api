@@ -10,8 +10,8 @@ const Product = require('../../../models/product/Product');
 const ProductComment = require('../../../models/product/ProductComment');
 const Bundle = require('../../../models/bundle/Bundle');
 const BundleComment = require('../../../models/bundle/BundleComment');
-const User = require('../../../models/user/User');
-const UserProfileImage = require('../../../models/user/UserProfileImage');
+const Customer = require('../../../models/customer/Customer');
+const CustomerProfileImage = require('../../../models/customer/CustomerProfileImage');
 
 app.get('/user/:userId', async (req, res) => {
   const { userId } = req.params;
@@ -22,14 +22,14 @@ app.get('/user/:userId', async (req, res) => {
 
   try {
     const commentsProductObj = await ProductComment.find({
-      user: userId,
+      customer: userId,
     })
       .populate({
-        path: 'user',
-        model: User,
+        path: 'customer',
+        model: Customer,
         populate: {
           path: 'profileImage',
-          model: UserProfileImage,
+          model: CustomerProfileImage,
         },
       })
       .populate({
@@ -40,13 +40,13 @@ app.get('/user/:userId', async (req, res) => {
     commentsProductObj.map((comment) => {
       commentsProductList.push({
         _id: comment._id,
-        user: {
+        customer: {
           names: {
-            firstName: comment.user.names.firstName,
-            lastName: comment.user.names.lastName,
+            firstName: comment.customer.names.firstName,
+            lastName: comment.customer.names.lastName,
           },
           profileImage: {
-            url: comment.user.profileImage.url,
+            url: comment.customer.profileImage.url,
           },
         },
         product: {
@@ -59,14 +59,14 @@ app.get('/user/:userId', async (req, res) => {
     });
 
     const commentsBundleObj = await BundleComment.find({
-      user: userId,
+      customer: userId,
     })
       .populate({
-        path: 'user',
-        model: User,
+        path: 'customer',
+        model: Customer,
         populate: {
           path: 'profileImage',
-          model: UserProfileImage,
+          model: CustomerProfileImage,
         },
       })
       .populate({
@@ -77,13 +77,13 @@ app.get('/user/:userId', async (req, res) => {
     commentsBundleObj.map((comment) => {
       commentsBundleList.push({
         _id: comment._id,
-        user: {
+        customer: {
           names: {
-            firstName: comment.user.names.firstName,
-            lastName: comment.user.names.lastName,
+            firstName: comment.customer.names.firstName,
+            lastName: comment.customer.names.lastName,
           },
           profileImage: {
-            url: comment.user.profileImage.url,
+            url: comment.customer.profileImage.url,
           },
         },
         bundle: {

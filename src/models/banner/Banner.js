@@ -7,9 +7,9 @@ var db = mongoose.createConnection(process.env.ATLAS_URI_CANADA_CANNABYSS, {
 });
 
 const BannerSchema = new mongoose.Schema({
-  user: {
+  reseller: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Reseller',
     required: true,
   },
   bannerName: {

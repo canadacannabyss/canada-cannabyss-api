@@ -9,12 +9,12 @@ var db = mongoose.createConnection(process.env.ATLAS_URI_CANADA_CANNABYSS, {
 const OrderSchema = new mongoose.Schema({
   cart: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Cart',
     required: true,
   },
-  user: {
+  customer: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Customer',
     required: true,
   },
   coupon: {

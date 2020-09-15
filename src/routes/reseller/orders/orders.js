@@ -8,8 +8,8 @@ const GstHst = require('../../../utils/taxes/gstHst');
 
 app.use(cors());
 
-const User = require('../../../models/user/User');
-const ProfileImage = require('../../../models/user/UserProfileImage');
+const Customer = require('../../../models/customer/Customer');
+const CustomerProfileImage = require('../../../models/customer/CustomerProfileImage');
 const Order = require('../../../models/order/Order');
 const Shipping = require('../../../models/shipping/Shipping');
 const Billing = require('../../../models/billing/Billings');
@@ -26,11 +26,11 @@ app.get('', async (req, res) => {
     completed: true,
   })
     .populate({
-      path: 'user',
-      model: User,
+      path: 'customer',
+      model: Customer,
       populate: {
         path: 'profileImage',
-        model: ProfileImage,
+        model: CustomerProfileImage,
       },
     })
     .populate({

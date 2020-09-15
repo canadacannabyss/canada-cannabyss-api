@@ -7,9 +7,9 @@ var db = mongoose.createConnection(process.env.ATLAS_URI_CANADA_CANNABYSS, {
 });
 
 const PaymentMethodSchema = new mongoose.Schema({
-  user: {
+  customer: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Customer',
     required: true,
   },
   card: {
@@ -24,8 +24,8 @@ const PaymentMethodSchema = new mongoose.Schema({
       default: null,
     },
   },
-  cryptoCurrency: {
-    currency: {
+  cryptocurrency: {
+    symbol: {
       type: String,
       required: false,
       default: null,

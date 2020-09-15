@@ -21,7 +21,7 @@ const Cart = require('../../../models/cart/Cart');
 app.get('/get/orders/user/:userId', async (req, res) => {
   const { userId } = req.params;
   Order.find({
-    user: userId,
+    customer: userId,
     completed: true,
   })
     .populate({

@@ -17,8 +17,8 @@ const ProductMedia = require('../models/product/ProductMedia');
 const Bundle = require('../models/bundle/Bundle');
 const BundleComment = require('../models/bundle/BundleComment');
 const BundleCommentReply = require('../models/bundle/BundleCommentReply');
-const User = require('../models/user/User');
-const UserProfileImage = require('../models/user/UserProfileImage');
+const Reseller = require('../models/reseller/Reseller');
+const ResellerProfileImage = require('../models/reseller/ResellerProfileImage');
 const Category = require('../models/category/Category');
 const CategoryMedia = require('../models/category/CategoryMedia');
 const Tag = require('../models/tag/Tag');
@@ -111,11 +111,11 @@ app.get('/get/bundle/:slug', (req, res) => {
     slug,
   })
     .populate({
-      path: 'user',
-      model: User,
+      path: 'reseller',
+      model: Reseller,
       populate: {
         path: 'profileImage',
-        model: UserProfileImage,
+        model: ResellerProfileImage,
       },
     })
     .populate({
@@ -151,11 +151,11 @@ app.get('/get/comments/:bundleId', async (req, res) => {
     bundle: bundleId,
   })
     .populate({
-      path: 'user',
-      model: User,
+      path: 'reseller',
+      model: Reseller,
       populate: {
         path: 'profileImage',
-        model: UserProfileImage,
+        model: ResellerProfileImage,
       },
     })
     .sort({
@@ -163,23 +163,18 @@ app.get('/get/comments/:bundleId', async (req, res) => {
     })
     .then((comments) => {
       comments.map((comment) => {
-        console.log('comment.user:', comment.user.names);
-        // console.log(
-        //   'comment.user.names.lastName:',
-        //   comment.user.names.lastName
-        // );
         commentsList.push({
           replies: comment.replies,
           updatedOn: comment.updatedOn,
           _id: comment._id,
-          user: {
+          customer: {
             names: {
-              firstName: comment.user.names.firstName,
-              lastName: comment.user.names.lastName,
+              firstName: comment.customer.names.firstName,
+              lastName: comment.customer.names.lastName,
             },
-            username: comment.user.username,
+            username: comment.customer.username,
             profileImage: {
-              url: comment.user.profileImage.url,
+              url: comment.customer.profileImage.url,
             },
           },
           content: comment.content,

@@ -13,9 +13,9 @@ const BundleCommentSchema = new mongoose.Schema({
     ref: 'Bundle',
     required: true,
   },
-  user: {
+  customer: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Customer',
     required: true,
   },
   content: {

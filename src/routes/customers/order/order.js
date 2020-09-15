@@ -33,7 +33,7 @@ app.post('/create/order', async (req, res) => {
   console.log('cartId:', cartId);
   const newOrder = new Order({
     cart: cartId,
-    user: userId,
+    customer: userId,
     shipping: {
       shippingHandling: 0,
       freeShippingApplied: false,
@@ -101,7 +101,7 @@ app.get('/get/order/:orderId', async (req, res) => {
 app.get('/get/order/user/:userId', async (req, res) => {
   const { userId } = req.params;
   Order.findOne({
-    user: userId,
+    customer: userId,
     paid: false,
     completed: false,
   })

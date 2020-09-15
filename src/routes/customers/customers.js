@@ -10,11 +10,13 @@ const Product = require('../../models/product/Product');
 const ProductComment = require('../../models/product/ProductComment');
 const ProductCommentReply = require('../../models/product/ProductCommentReply');
 const ProductMedia = require('../../models/product/ProductMedia');
+
 const Bundle = require('../../models/bundle/Bundle');
 const BundleComment = require('../../models/bundle/BundleComment');
 const BundleCommentReply = require('../../models/bundle/BundleCommentReply');
-const User = require('../../models/user/User');
-const UserProfileImage = require('../../models/user/UserProfileImage');
+
+const Customer = require('../../models/customer/Customer');
+const CustomerProfileImage = require('../../models/customer/CustomerProfileImage');
 
 app.post('/comment/post', async (req, res) => {
   const { productId, userId, content, stars } = req.body;
@@ -70,11 +72,11 @@ app.post('/comment/post', async (req, res) => {
         product: productId,
       })
         .populate({
-          path: 'user',
-          model: User,
+          path: 'customer',
+          model: Customer,
           populate: {
             path: 'profileImage',
-            model: UserProfileImage,
+            model: CustomerProfileImage,
           },
         })
         .populate({
@@ -123,7 +125,7 @@ app.post('/bundle/comment/post', async (req, res) => {
     let commentId;
     const newComment = new BundleComment({
       id,
-      user: userId,
+      customer: userId,
       bundle: bundleId,
       content,
       createdOn,
@@ -151,11 +153,11 @@ app.post('/bundle/comment/post', async (req, res) => {
         bundle: bundleId,
       })
         .populate({
-          path: 'user',
-          model: User,
+          path: 'customer',
+          model: Customer,
           populate: {
             path: 'profileImage',
-            model: UserProfileImage,
+            model: CustomerProfileImage,
           },
         })
         .populate({
@@ -201,7 +203,7 @@ app.post('/comment/reply', async (req, res) => {
     let commentIdVar;
     const newCommentReply = new CommentReply({
       id,
-      user: userId,
+      customer: userId,
       product: productId,
       comment: commentId,
       content,

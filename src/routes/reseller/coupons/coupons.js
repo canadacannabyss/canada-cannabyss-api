@@ -88,6 +88,7 @@ router.get('/get/coupon/:slug', async (req, res) => {
 
 router.post('/create', async (req, res) => {
   const {
+    userId,
     couponName,
     description,
     featured,
@@ -135,6 +136,7 @@ router.post('/create', async (req, res) => {
       const resultsAsyncTagsArray = await Promise.all(promisesTags);
 
       const newCoupon = new Coupon({
+        reseller: userId,
         couponName,
         slug,
         description,

@@ -16,11 +16,12 @@ const Product = require('../models/product/Product');
 const ProductComment = require('../models/product/ProductComment');
 const ProductCommentReply = require('../models/product/ProductCommentReply');
 const ProductMedia = require('../models/product/ProductMedia');
+
 const Bundle = require('../models/bundle/Bundle');
-const User = require('../models/user/User');
-const UserProfileImage = require('../models/user/UserProfileImage');
+
 const Category = require('../models/category/Category');
 const CategoryMedia = require('../models/category/CategoryMedia');
+
 const Tag = require('../models/tag/Tag');
 
 app.get('/product/products/:userId', (req, res) => {
@@ -44,7 +45,7 @@ app.get('/product/products/:userId', (req, res) => {
 app.get('/bundle/bundles/:userId', (req, res) => {
   const { userId } = req.params;
   Bundle.find({
-    user: userId,
+    reseller: userId,
   })
     .populate({
       path: 'products',
