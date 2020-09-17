@@ -87,6 +87,8 @@ router.get('/panel/get/:slug', (req, res) => {
 router.get('/:slug', (req, res) => {
   const { slug } = req.params;
 
+  console.log('slug:', slug);
+
   Bundle.findOne({
     slug: slug,
   })
@@ -255,6 +257,7 @@ router.post('/set/global-variable', async (req, res) => {
 // Update Podcast Info
 router.put('/update/:id', async (req, res) => {
   const {
+    userId,
     products,
     variants,
     bundleName,
@@ -306,6 +309,7 @@ router.put('/update/:id', async (req, res) => {
           _id: id,
         },
         {
+          reseller: userId,
           products: products,
           variants: variants,
           bundleName: bundleName,

@@ -14,13 +14,20 @@ app.use(cors());
 
 const Product = require('../models/product/Product');
 const ProductMedia = require('../models/product/ProductMedia');
+
 const Bundle = require('../models/bundle/Bundle');
 const BundleComment = require('../models/bundle/BundleComment');
 const BundleCommentReply = require('../models/bundle/BundleCommentReply');
+
 const Reseller = require('../models/reseller/Reseller');
 const ResellerProfileImage = require('../models/reseller/ResellerProfileImage');
+
+const Customer = require('../models/customer/Customer');
+const CustomerProfileImage = require('../models/customer/CustomerProfileImage');
+
 const Category = require('../models/category/Category');
 const CategoryMedia = require('../models/category/CategoryMedia');
+
 const Tag = require('../models/tag/Tag');
 
 app.get('', async (req, res) => {
@@ -83,11 +90,16 @@ app.get('/navbar/all', (req, res) => {
     });
 });
 
-app.get('/navbar/category/:category', (req, res) => {
-  const { category } = req.params;
+app.get('/navbar/category/:category', async (req, res) => {
+  const { category: categoryId } = req.params;
+
+  const categoryObj = await Category.findOne({
+    _id: categoryId,
+  });
+
   let bundlesList = [];
   Bundle.find({
-    'organization.category': category,
+    'organization.categories': categoryObj._id,
   })
     .limit(18)
     .then((bundles) => {
@@ -151,11 +163,11 @@ app.get('/get/comments/:bundleId', async (req, res) => {
     bundle: bundleId,
   })
     .populate({
-      path: 'reseller',
-      model: Reseller,
+      path: 'customer',
+      model: Customer,
       populate: {
         path: 'profileImage',
-        model: ResellerProfileImage,
+        model: CustomerProfileImage,
       },
     })
     .sort({
@@ -163,6 +175,7 @@ app.get('/get/comments/:bundleId', async (req, res) => {
     })
     .then((comments) => {
       comments.map((comment) => {
+        console.log('comment bundle:', comment);
         commentsList.push({
           replies: comment.replies,
           updatedOn: comment.updatedOn,
@@ -192,7 +205,7 @@ app.get('/get/comments/:bundleId', async (req, res) => {
 
 app.get('/get/categories', async (req, res) => {
   let categoriesList = [];
-  Bundle.distinct('organization.category', async (error, results) => {
+  Bundle.distinct('organization.categories', async (error, results) => {
     const categories = await Category.find({
       _id: results,
     });

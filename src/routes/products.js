@@ -86,16 +86,23 @@ app.get('/navbar/all', (req, res) => {
     });
 });
 
-app.get('/navbar/category/:category', (req, res) => {
-  const { category } = req.params;
-  console.log('tested category:', category);
+app.get('/navbar/category/:category', async (req, res) => {
+  const { category: categoryId } = req.params;
+
+  console.log('categoryId:', categoryId);
+
+  const categoryObj = await Category.findOne({
+    _id: categoryId,
+  });
+
+  console.log('categoriesObj:', categoryObj);
+
   let productsList = [];
   Product.find({
-    'organization.category': category,
+    'organization.categories': categoryObj._id,
   })
     .limit(18)
     .then((products) => {
-      console.log('products category:', products);
       products.map((product) => {
         productsList.push({
           slug: product.slug,
@@ -136,6 +143,7 @@ app.get('/get/product/:slug', (req, res) => {
       model: Tag,
     })
     .then((product) => {
+      console.log('product found:', product);
       const variantsValues = [];
       for (let i = 0; i < product.variants.variantsOptionNames.length; i += 1) {
         variantsValues.push([]);
@@ -266,7 +274,7 @@ app.get('/get/comments/:productId', async (req, res) => {
 
 app.get('/get/categories', async (req, res) => {
   let categoriesList = [];
-  Product.distinct('organization.category', async (error, results) => {
+  Product.distinct('organization.categories', async (error, results) => {
     const categories = await Category.find({
       _id: results,
     });
@@ -336,6 +344,59 @@ app.get('/get/products/category/:category', async (req, res) => {
         model: ProductMedia,
       })
       .exec();
+    res.status(200).send(results);
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+app.get('/get/products/tag/:tag', async (req, res) => {
+  const { tag } = req.params;
+  const tagObj = await Tag.findOne({
+    slug: tag,
+  });
+
+  const page = parseInt(req.query.page);
+  const limit = parseInt(req.query.limit);
+
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+
+  const results = {};
+
+  if (
+    endIndex <
+    (await Product.find({
+      'organization.tag': tagObj._id,
+    })
+      .countDocuments()
+      .exec())
+  ) {
+    results.next = {
+      page: page + 1,
+      limit: limit,
+    };
+  }
+
+  if (startIndex > 0) {
+    results.previous = {
+      page: page - 1,
+      limit: limit,
+    };
+  }
+
+  try {
+    results.results = await Product.find({
+      'organization.tags': tagObj._id,
+    })
+      .limit(limit)
+      .skip(startIndex)
+      .populate({
+        path: 'media',
+        model: ProductMedia,
+      })
+      .exec();
+    console.log('products result:', results);
     res.status(200).send(results);
   } catch (err) {
     console.error(err);
