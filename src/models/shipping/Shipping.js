@@ -47,6 +47,11 @@ const ShippingSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  deleted: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
   createdOn: {
     type: Date,
     required: true,

@@ -49,6 +49,7 @@ app.get('/get/billing/:billingId', async (req, res) => {
 
   Billing.findOne({
     _id: billingId,
+    deleted: false,
   })
     .then((billing) => {
       res.json(billing);
@@ -63,6 +64,7 @@ app.get('/get/all/:userId', async (req, res) => {
 
   Billing.find({
     customer: userId,
+    deleted: false,
   })
     .then((billing) => {
       res.json(billing);
@@ -113,17 +115,23 @@ app.put('/edit/:billingId', async (req, res) => {
     });
 });
 
-app.delete('/delete/:billingId', async (req, res) => {
+app.put('/delete/:billingId', async (req, res) => {
   const { billingId } = req.params;
 
   try {
-    const billingObj = await Billing.findOne({
-      _id: billingId,
+    Billing.findOneAndUpdate(
+      {
+        _id: billingId,
+      },
+      {
+        deleted: true,
+      },
+      {
+        runValidators: true,
+      }
+    ).then(() => {
+      res.status(200).send({ ok: true });
     });
-
-    billingObj.remove();
-
-    res.status(200).send({ ok: true });
   } catch (err) {
     console.error(err);
   }

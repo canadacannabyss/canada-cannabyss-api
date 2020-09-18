@@ -51,6 +51,7 @@ app.get('/get/shipping/:shippingId', async (req, res) => {
   Shipping.findOne({
     _id: shippingId,
     customer: userId,
+    deleted: false,
   })
     .then((shipping) => {
       res.json(shipping);
@@ -65,6 +66,7 @@ app.get('/get/all/:userId', async (req, res) => {
 
   Shipping.find({
     customer: userId,
+    deleted: false,
   })
     .then((shipping) => {
       res.json(shipping);
@@ -115,17 +117,23 @@ app.put('/edit/:shippingId', async (req, res) => {
     });
 });
 
-app.delete('/delete/:shippingId', async (req, res) => {
+app.put('/delete/:shippingId', async (req, res) => {
   const { shippingId } = req.params;
 
   try {
-    const billingObj = await Shipping.findOne({
-      _id: shippingId,
+    Shipping.findOneAndUpdate(
+      {
+        _id: shippingId,
+      },
+      {
+        deleted: true,
+      },
+      {
+        runValidators: true,
+      }
+    ).then(() => {
+      res.status(200).send({ ok: true });
     });
-
-    billingObj.remove();
-
-    res.status(200).send({ ok: true });
   } catch (err) {
     console.error(err);
   }
