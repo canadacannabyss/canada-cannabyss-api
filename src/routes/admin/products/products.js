@@ -221,6 +221,7 @@ router.post('/set/global-variable', async (req, res) => {
 router.put('/update/:id', async (req, res) => {
   const {
     media,
+    reseller,
     productName,
     prices,
     taxableProduct,
@@ -286,6 +287,7 @@ router.put('/update/:id', async (req, res) => {
       },
       {
         media: newMedia,
+        reseller: reseller,
         productName: productName,
         slug: slug,
         prices: {

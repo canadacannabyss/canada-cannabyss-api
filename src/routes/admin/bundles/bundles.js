@@ -257,7 +257,7 @@ router.post('/set/global-variable', async (req, res) => {
 // Update Podcast Info
 router.put('/update/:id', async (req, res) => {
   const {
-    userId,
+    reseller,
     products,
     variants,
     bundleName,
@@ -309,7 +309,7 @@ router.put('/update/:id', async (req, res) => {
           _id: id,
         },
         {
-          reseller: userId,
+          reseller,
           products: products,
           variants: variants,
           bundleName: bundleName,

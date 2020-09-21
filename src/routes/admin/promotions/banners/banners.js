@@ -176,6 +176,7 @@ router.delete('/delete/banner/:bannerId', async (req, res) => {
 // Update Podcast Info
 router.put('/update/:id', async (req, res) => {
   const {
+    reseller,
     bannerName,
     description,
     featured,
@@ -221,6 +222,7 @@ router.put('/update/:id', async (req, res) => {
           _id: id,
         },
         {
+          reseller: reseller,
           bannerName: bannerName,
           slug: slug,
           description: description,

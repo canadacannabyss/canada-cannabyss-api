@@ -13,6 +13,12 @@ const CategorySchema = new mongoose.Schema({
     required: false,
     default: null,
   },
+  reseller: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Reseller',
+    required: false,
+    default: null,
+  },
   categoryName: {
     type: String,
     required: true,
