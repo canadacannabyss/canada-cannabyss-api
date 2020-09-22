@@ -53,6 +53,67 @@ router.get('', async (req, res) => {
     });
 });
 
+router.get('/bundle/products', async (req, res) => {
+  const productsList = [];
+  Product.find()
+    .populate({
+      path: 'media',
+      model: ProductMedia,
+    })
+    .then((products) => {
+      products.map((product) => {
+        const variantsValues = [];
+        for (
+          let i = 0;
+          i < product.variants.variantsOptionNames.length;
+          i += 1
+        ) {
+          variantsValues.push([]);
+        }
+        product.variants.variantsOptionNames.map((name, index) => {
+          product.variants.values.map((value) => {
+            if (value.active) {
+              variantsValues[index].push(value.variantValues[index]);
+            }
+          });
+        });
+        const uniqueVariantValues = [];
+        for (
+          let i = 0;
+          i < product.variants.variantsOptionNames.length;
+          i += 1
+        ) {
+          uniqueVariantValues.push([]);
+        }
+        variantsValues.map((valueArray, index) => {
+          uniqueVariantValues[index] = valueArray.filter(
+            (v, i, a) => a.indexOf(v) === i
+          );
+        });
+        productsList.push({
+          variants: {
+            variantsOptionNames: product.variants.variantsOptionNames,
+            values: product.variants.values,
+            uniqueValues: uniqueVariantValues,
+          },
+          media: product.media,
+          howManyViewed: product.howManyViewed,
+          productName: product.productName,
+          slug: product.slug,
+          taxableProduct: product.taxableProduct,
+          description: product.description,
+          extraInfo: product.extraInfo,
+          _id: product._id,
+        });
+      });
+
+      res.status(200).send(productsList);
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+});
+
 router.get('/panel/get/:slug', (req, res) => {
   const { slug } = req.params;
   Product.findOne({

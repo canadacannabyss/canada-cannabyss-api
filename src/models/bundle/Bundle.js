@@ -12,11 +12,56 @@ const BundleSchema = new mongoose.Schema({
     ref: 'Reseller',
     required: true,
   },
+  // products: [
+  //   {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: 'Product',
+  //     required: true,
+  //   },
+  // ],
   products: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product',
-      required: true,
+      _id: {
+        type: String,
+        required: true,
+      },
+      productName: {
+        type: String,
+        required: true,
+      },
+      slug: {
+        type: String,
+        required: true,
+      },
+      prices: {
+        price: {
+          type: Number,
+          required: true,
+        },
+        compareTo: {
+          type: Number,
+          required: false,
+        },
+      },
+      quantity: {
+        type: Number,
+        required: true,
+        default: 0,
+      },
+      media: {
+        url: {
+          type: String,
+          required: true,
+        },
+      },
+      variantName: {
+        type: [String],
+        require: true,
+      },
+      variant: {
+        type: [String],
+        required: true,
+      },
     },
   ],
   bundleName: {
