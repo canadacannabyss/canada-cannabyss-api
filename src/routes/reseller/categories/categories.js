@@ -40,7 +40,9 @@ const convertNameToSlug = (name) => {
 };
 
 router.get('', (req, res) => {
-  Category.find()
+  Category.find({
+    'deletion.isDeleted': false,
+  })
     .sort({
       createdOn: -1,
     })

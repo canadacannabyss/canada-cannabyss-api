@@ -64,7 +64,7 @@ app.use(
 app.use('/search', require('./routes/search'));
 app.use('/home', require('./routes/home'));
 app.use('/products', require('./routes/products'));
-app.use('/promotionS', require('./routes/promotions'));
+app.use('/promotions', require('./routes/promotions'));
 app.use('/bundles', require('./routes/bundles'));
 app.use('/categories', require('./routes/categories'));
 app.use('/customers', require('./routes/customers/customers'));
@@ -115,6 +115,7 @@ app.use(
 );
 app.use('/reseller/orders', require('./routes/reseller/orders/orders'));
 app.use('/reseller/coupons', require('./routes/reseller/coupons/coupons'));
+app.use('/reseller', require('./routes/reseller/index'));
 
 app.use('/addresses', require('./routes/addresses/addresses'));
 

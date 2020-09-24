@@ -105,6 +105,17 @@ const OrderSchema = new mongoose.Schema({
     required: false,
     default: false,
   },
+  deletion: {
+    isDeleted: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    when: {
+      type: Date,
+      required: false,
+    },
+  },
   createdOn: {
     type: Date,
     required: false,

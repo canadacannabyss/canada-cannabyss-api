@@ -38,7 +38,9 @@ const verifyValidSlug = async (slug) => {
 };
 
 router.get('', (res, req) => {
-  Banner.find()
+  Banner.find({
+    'deletion.isDeleted': false,
+  })
     .populate({
       path: 'promotions',
       model: Promotion,
@@ -157,20 +159,27 @@ router.post('/set/global-variable', async (req, res) => {
 });
 
 // Delete Podcast
-router.delete('/delete/banner/:bannerId', async (req, res) => {
+router.put('/delete/banner/:bannerId', async (req, res) => {
   const { bannerId } = req.params;
 
-  try {
-    const bannerObj = await Banner.findOne({
+  Banner.findOneAndUpdate(
+    {
       _id: bannerId,
+    },
+    {
+      'deletion.isDeleted': true,
+      'deletion.when': Date.now(),
+    },
+    {
+      runValidators: true,
+    }
+  )
+    .then(() => {
+      res.status(200).send({ ok: true });
+    })
+    .catch((err) => {
+      console.error(err);
     });
-
-    bannerObj.remove();
-
-    res.status(200).send({ ok: true });
-  } catch (err) {
-    console.log(err);
-  }
 });
 
 // Update Podcast Info

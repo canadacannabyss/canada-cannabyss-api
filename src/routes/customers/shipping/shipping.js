@@ -126,7 +126,8 @@ app.put('/delete/:shippingId', async (req, res) => {
         _id: shippingId,
       },
       {
-        deleted: true,
+        'deletion.isDeleted': true,
+        'deletion.when': Date.now(),
       },
       {
         runValidators: true,

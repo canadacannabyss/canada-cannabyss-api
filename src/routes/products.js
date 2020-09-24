@@ -54,7 +54,9 @@ app.get('', async (req, res) => {
   }
 
   try {
-    results.results = await Product.find()
+    results.results = await Product.find({
+      'deletion.isDeleted': false,
+    })
       .limit(limit)
       .skip(startIndex)
       .populate({
@@ -99,6 +101,7 @@ app.get('/navbar/category/:category', async (req, res) => {
 
   let productsList = [];
   Product.find({
+    'deletion.isDeleted': false,
     'organization.categories': categoryObj._id,
   })
     .limit(18)
@@ -121,6 +124,7 @@ app.get('/get/product/:slug', (req, res) => {
   console.log('slug product:', slug);
   Product.findOne({
     slug,
+    'deletion.isDeleted': false,
   })
     .populate({
       path: 'reseller',

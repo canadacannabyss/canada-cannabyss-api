@@ -54,7 +54,9 @@ app.get('', async (req, res) => {
   }
 
   try {
-    results.results = await Bundle.find()
+    results.results = await Bundle.find({
+      'deletion.isDeleted': false,
+    })
       .limit(limit)
       .skip(startIndex)
       .populate({

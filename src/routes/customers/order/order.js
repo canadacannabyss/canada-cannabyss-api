@@ -1,33 +1,46 @@
 const express = require('express');
 
-const app = express();
+const router = express.Router();
 const cors = require('cors');
 const uuidv4 = require('uuid/v4');
+const multer = require('multer');
+
+const multerConfig = require('../../../config/multer');
 
 const GstHst = require('../../../utils/taxes/gstHst');
 const PStRst = require('../../../utils/taxes/pstRst');
 
-app.use(cors());
+router.use(cors());
 
 const Order = require('../../../models/order/Order');
+
 const Cart = require('../../../models/cart/Cart');
+
 const Product = require('../../../models/product/Product');
+
 const Bundle = require('../../../models/bundle/Bundle');
+
 const Coupon = require('../../../models/coupon/Coupon');
+
 const Shipping = require('../../../models/shipping/Shipping');
+
 const Billing = require('../../../models/billing/Billings');
+
 const PaymentMethod = require('../../../models/paymentMethod/PaymentMethod');
+
+const OrderPaymentReceipt = require('../../../models/order/OrderPaymentReceipt');
+
 const PstRst = require('../../../utils/taxes/pstRst');
 
 // const authMiddleware = require('../../../middleware/auth');
 
-// app.use(authMiddleware);
+// router.use(authMiddleware);
 
 const roundFloatNumber = (number) => {
   return Math.round((number + Number.EPSILON) * 100) / 100;
 };
 
-app.post('/create/order', async (req, res) => {
+router.post('/create/order', async (req, res) => {
   const { userId, cartId } = req.body;
   console.log('userId:', userId);
   console.log('cartId:', cartId);
@@ -65,7 +78,7 @@ app.post('/create/order', async (req, res) => {
     });
 });
 
-app.get('/get/order/:orderId', async (req, res) => {
+router.get('/get/order/:orderId', async (req, res) => {
   const { orderId } = req.params;
   Order.findOne({
     _id: orderId,
@@ -98,7 +111,7 @@ app.get('/get/order/:orderId', async (req, res) => {
     });
 });
 
-app.get('/get/order/user/:userId', async (req, res) => {
+router.get('/get/order/user/:userId', async (req, res) => {
   const { userId } = req.params;
   Order.findOne({
     customer: userId,
@@ -133,7 +146,7 @@ app.get('/get/order/user/:userId', async (req, res) => {
     });
 });
 
-app.put('/update/subtotal', async (req, res) => {
+router.put('/update/subtotal', async (req, res) => {
   const { orderId, subtotal } = req.body;
   console.log('subtotal:', subtotal);
 
@@ -231,7 +244,7 @@ app.put('/update/subtotal', async (req, res) => {
   }
 });
 
-app.put('/coupon/apply', async (req, res) => {
+router.put('/coupon/apply', async (req, res) => {
   const { orderId, couponName } = req.body;
   console.log(orderId, couponName);
   try {
@@ -299,7 +312,7 @@ app.put('/coupon/apply', async (req, res) => {
   }
 });
 
-app.put('/update/shipping/handling', async (req, res) => {
+router.put('/update/shipping/handling', async (req, res) => {
   const { orderId } = req.body;
 
   try {
@@ -387,7 +400,7 @@ app.put('/update/shipping/handling', async (req, res) => {
   }
 });
 
-app.put('/reset/shipping/handling', async (req, res) => {
+router.put('/reset/shipping/handling', async (req, res) => {
   const { orderId } = req.body;
 
   try {
@@ -424,7 +437,7 @@ app.put('/reset/shipping/handling', async (req, res) => {
   }
 });
 
-app.put('/update/total/before-tax', async (req, res) => {
+router.put('/update/total/before-tax', async (req, res) => {
   const { orderId } = req.body;
 
   try {
@@ -458,7 +471,7 @@ app.put('/update/total/before-tax', async (req, res) => {
   }
 });
 
-app.put('/update/tax/gsthst', async (req, res) => {
+router.put('/update/tax/gsthst', async (req, res) => {
   const { orderId } = req.body;
 
   try {
@@ -494,7 +507,7 @@ app.put('/update/tax/gsthst', async (req, res) => {
   }
 });
 
-app.put('/update/tax/pstrst', async (req, res) => {
+router.put('/update/tax/pstrst', async (req, res) => {
   const { orderId } = req.body;
 
   try {
@@ -538,7 +551,7 @@ app.put('/update/tax/pstrst', async (req, res) => {
   }
 });
 
-app.put('/update/total', async (req, res) => {
+router.put('/update/total', async (req, res) => {
   const { orderId } = req.body;
 
   try {
@@ -574,7 +587,7 @@ app.put('/update/total', async (req, res) => {
   }
 });
 
-app.put('/update/shipping', async (req, res) => {
+router.put('/update/shipping', async (req, res) => {
   const { orderId, shippingAddressId } = req.body;
 
   try {
@@ -603,7 +616,7 @@ app.put('/update/shipping', async (req, res) => {
   }
 });
 
-app.put('/update/billing', async (req, res) => {
+router.put('/update/billing', async (req, res) => {
   const { orderId, billingAddressId } = req.body;
 
   console.log('UPDATE orderId, billing:', orderId, billingAddressId);
@@ -633,7 +646,7 @@ app.put('/update/billing', async (req, res) => {
   }
 });
 
-app.put('/update/payment-method', async (req, res) => {
+router.put('/update/payment-method', async (req, res) => {
   const { orderId, paymentMethodId } = req.body;
 
   console.log('orderId, paymentMethodId:', orderId, paymentMethodId);
@@ -663,7 +676,7 @@ app.put('/update/payment-method', async (req, res) => {
   }
 });
 
-app.put('/update/completed', async (req, res) => {
+router.put('/update/completed', async (req, res) => {
   const { orderId } = req.body;
 
   try {
@@ -690,4 +703,29 @@ app.put('/update/completed', async (req, res) => {
   }
 });
 
-module.exports = app;
+router.post(
+  '/order-payment-receipt/publish/media',
+  multer(multerConfig).single('file'),
+  async (req, res) => {
+    try {
+      const { originalname: name, size, key, location: url = '' } = req.file;
+      const id = uuidv4();
+
+      console.log(name, size, key, url);
+
+      const orderPaymentReceipt = await OrderPaymentReceipt.create({
+        id,
+        name,
+        size,
+        key,
+        url,
+      });
+
+      return res.json(orderPaymentReceipt);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+);
+
+module.exports = router;

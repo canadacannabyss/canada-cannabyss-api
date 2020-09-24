@@ -40,7 +40,9 @@ const verifyValidSlug = async (slug) => {
 };
 
 router.get('', async (req, res) => {
-  Product.find()
+  Product.find({
+    'deletion.isDeleted': false,
+  })
     .populate({
       path: 'media',
       model: ProductMedia,
@@ -439,40 +441,67 @@ router.get('/:slug', (req, res) => {
 });
 
 // Delete Podcast
-router.delete('/delete/product/:productId', async (req, res) => {
+router.put('/delete/product/:productId', async (req, res) => {
   const { productId } = req.params;
-  console.log('productId:', productId);
 
-  try {
-    const productObj = await Product.findOne({
-      _id: productId,
+  Product.findOne({
+    _id: productId,
+  }).then((product) => {
+    product.media.map(async (media) => {
+      await ProductMedia.findOneAndUpdate(
+        {
+          _id: media,
+        },
+        {
+          'deletion.isDeleted': true,
+          'deletion.when': Date.now(),
+        },
+        {
+          runValidators: true,
+        }
+      );
     });
 
-    productObj.media.map(async (media) => {
-      console.log(media);
-      const productMediaObj = await ProductMedia.findOne({
-        _id: media,
+    product
+      .updateOne(
+        {
+          'deletion.isDeleted': true,
+          'deletion.when': Date.now(),
+        },
+        {
+          runValidators: true,
+        }
+      )
+      .then(() => {
+        res.status(200).send({ ok: true });
+      })
+      .catch((err) => {
+        console.error(err);
       });
-      await productMediaObj.remove();
-    });
-    productObj.remove();
-    res.status(200).send({ ok: true });
-  } catch (err) {
-    console.log(err);
-  }
+  });
 });
 
 router.delete('/delete/cover/:id', async (req, res) => {
   const { id } = req.params;
-  console.log('deleting product image id:', id);
-  const coverFile = await ProductMedia.findOne({
-    _id: id,
-  });
 
-  await coverFile.remove();
-  res.status(200).send({
-    ok: true,
-  });
+  ProductMedia.findOneAndUpdate(
+    {
+      _id: id,
+    },
+    {
+      'deletion.isDeleted': true,
+      'deletion.when': Date.now(),
+    },
+    {
+      runValidators: true,
+    }
+  )
+    .then(() => {
+      res.status(200).send({ ok: true });
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 });
 
 module.exports = router;

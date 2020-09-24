@@ -20,6 +20,17 @@ const CategoryMediaSchema = new mongoose.Schema({
   size: Number,
   key: String,
   url: String,
+  deletion: {
+    isDeleted: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    when: {
+      type: Date,
+      required: false,
+    },
+  },
   createdOn: {
     type: Date,
     default: Date.now,

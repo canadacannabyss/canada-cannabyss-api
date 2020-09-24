@@ -27,7 +27,9 @@ const PromotionMedia = require('../models/promotion/PromotionMedia');
 
 app.get('/main/products', (req, res) => {
   let productsList = [];
-  Product.find()
+  Product.find({
+    'deletion.isDeleted': false,
+  })
     .populate({
       path: 'media',
       model: ProductMedia,
@@ -57,7 +59,9 @@ app.get('/main/products', (req, res) => {
 
 app.get('/main/bundles', (req, res) => {
   let bundlesList = [];
-  Bundle.find()
+  Bundle.find({
+    'deletion.isDeleted': false,
+  })
     .populate({
       path: 'products',
       model: Product,
@@ -98,6 +102,7 @@ app.get('/main/bundles', (req, res) => {
 app.get('/main/banners', async (req, res) => {
   Banner.find({
     featured: true,
+    'deletion.isDeleted': false,
   })
     .populate({
       path: 'promotions',
@@ -118,6 +123,7 @@ app.get('/main/banners', async (req, res) => {
 app.get('/main/category', (req, res) => {
   Category.find({
     featured: true,
+    'deletion.isDeleted': false,
   })
     .populate({
       path: 'media',
@@ -137,7 +143,9 @@ app.get('/main/category', (req, res) => {
 
 app.get('/main/newest/products', (req, res) => {
   let productsList = [];
-  Product.find()
+  Product.find({
+    'deletion.isDeleted': false,
+  })
     .populate({
       path: 'media',
       model: ProductMedia,

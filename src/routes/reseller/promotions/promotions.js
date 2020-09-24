@@ -42,7 +42,9 @@ const verifyValidSlug = async (slug) => {
 };
 
 router.get('', async (req, res) => {
-  Promotion.find()
+  Promotion.find({
+    'deletion.isDeleted': false,
+  })
     .populate({
       path: 'media',
       model: PromotionMedia,
@@ -367,19 +369,43 @@ router.put('/update/:id', async (req, res) => {
 router.delete('/delete/promotion/:promotionId', async (req, res) => {
   const { promotionId } = req.params;
 
-  try {
-    const promotionObj = await Promotion.findOne({
-      _id: promotionId,
+  Promotion.findOne({
+    _id: promotionId,
+  })
+    .then(async (promotion) => {
+      await PromotionMedia.findOneAndUpdate(
+        {
+          _id: promotion.media,
+        },
+        {
+          'deletion.isDeleted': true,
+          'deletion.when': Date.now(),
+        },
+        {
+          runValidators: true,
+        }
+      );
+
+      promotion
+        .updateOne(
+          {
+            'deletion.isDeleted': true,
+            'deletion.when': Date.now(),
+          },
+          {
+            runValidators: true,
+          }
+        )
+        .then(() => {
+          res.status(200).send({ ok: true });
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    })
+    .catch((err) => {
+      console.error(err);
     });
-
-    console.log('promotion deletion:', promotionObj);
-
-    promotionObj.remove();
-
-    res.status(200).send({ ok: true });
-  } catch (err) {
-    console.log(err);
-  }
 });
 
 // Delete Podcast

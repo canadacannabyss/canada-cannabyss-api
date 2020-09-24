@@ -340,39 +340,66 @@ app.put('/update/cover/:id', async (req, res) => {
 });
 
 // Delete Category
-app.delete('/delete/category/:categoryId', async (req, res) => {
+app.put('/delete/category/:categoryId', async (req, res) => {
   const { categoryId } = req.params;
-  console.log('categoryId:', categoryId);
 
-  try {
-    const categoryObj = await Category.findOne({
-      _id: categoryId,
-    });
+  Category.findOne({
+    _id: categoryId,
+  }).then(async (category) => {
+    await CategoryMedia.findOneAndUpdate(
+      {
+        _id: category.media,
+      },
+      {
+        'deletion.isDeleted': true,
+        'deletion.when': Date.now(),
+      },
+      {
+        runValidators: true,
+      }
+    );
 
-    const categoryMediaObj = await CategoryMedia.findOne({
-      _id: categoryObj.media,
-    });
-    if (categoryMediaObj !== null) {
-      categoryMediaObj.remove();
-    }
-    categoryObj.remove();
-
-    res.status(200).send({ ok: true });
-  } catch (err) {
-    console.log(err);
-  }
+    category
+      .updateOne(
+        {
+          'deletion.isDeleted': true,
+          'deletion.when': Date.now(),
+        },
+        {
+          runValidators: true,
+        }
+      )
+      .then(() => {
+        res.status(200).send({ ok: true });
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  });
 });
 
 // Delete Category Cover
-app.delete('/delete/media/:id', async (req, res) => {
+app.put('/delete/media/:id', async (req, res) => {
   const { id } = req.params;
-  const coverFile = await CategoryMedia.findOne({
-    id: id,
-  });
-  await coverFile.remove();
-  return res.send({
-    msg: 'Blog Category cover file successfully deleted',
-  });
+
+  CategoryMedia.findOneAndUpdate(
+    {
+      _id: id,
+    },
+    {
+      'deletion.isDeleted': true,
+      'deletion.when': Date.now(),
+    },
+    {
+      runValidators: true,
+    }
+  )
+    .then(() => {
+      res.status(200).send({ ok: true });
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 });
 
 module.exports = app;

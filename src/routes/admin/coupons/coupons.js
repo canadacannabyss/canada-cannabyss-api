@@ -260,19 +260,27 @@ router.put('/edit', async (req, res) => {
 });
 
 // Delete Podcast
-router.delete('/delete/coupon/:couponId', async (req, res) => {
+router.put('/delete/coupon/:couponId', async (req, res) => {
   const { couponId } = req.params;
-  console.log('couponId:', couponId);
 
-  try {
-    const productObj = await Coupon.findOne({
+  Coupon.findOneAndUpdate(
+    {
       _id: couponId,
+    },
+    {
+      'deletion.isDeleted': true,
+      'deletion.when': Date.now(),
+    },
+    {
+      runValidators: true,
+    }
+  )
+    .then(() => {
+      res.status(200).send({ ok: true });
+    })
+    .catch((err) => {
+      console.error(err);
     });
-    productObj.remove();
-    res.status(200).send({ ok: true });
-  } catch (err) {
-    console.log(err);
-  }
 });
 
 module.exports = router;

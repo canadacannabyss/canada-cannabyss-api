@@ -124,7 +124,8 @@ app.put('/delete/:billingId', async (req, res) => {
         _id: billingId,
       },
       {
-        deleted: true,
+        'deletion.isDeleted': true,
+        'deletion.when': Date.now(),
       },
       {
         runValidators: true,

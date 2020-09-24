@@ -42,7 +42,9 @@ const verifyValidSlug = async (slug) => {
 };
 
 router.get('', async (req, res) => {
-  Bundle.find()
+  Bundle.find({
+    'deletion.isDeleted': false,
+  })
     .populate({
       path: 'products',
       model: Product,
@@ -381,19 +383,25 @@ router.delete('/delete/:id', (req, res) => {
 // Delete Podcast
 router.delete('/delete/bundle/:bundleId', async (req, res) => {
   const { bundleId } = req.params;
-  console.log('bundleId:', bundleId);
 
-  try {
-    const bundleObj = await Bundle.findOne({
+  await Bundle.findOneAndUpdate(
+    {
       _id: bundleId,
+    },
+    {
+      'deletion.isDeleted': true,
+      'deletion.when': Date.now(),
+    },
+    {
+      runValidators: true,
+    }
+  )
+    .then(() => {
+      res.status(200).send({ ok: true });
+    })
+    .catch((err) => {
+      console.error(err);
     });
-
-    bundleObj.remove();
-
-    res.status(200).send({ ok: true });
-  } catch (err) {
-    console.log(err);
-  }
 });
 
 router.delete('/delete/cover/:id', async (req, res) => {

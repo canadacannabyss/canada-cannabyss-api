@@ -34,7 +34,9 @@ const verifyValidSlug = async (slug) => {
 };
 
 router.get('/get/all', async (req, res) => {
-  Coupon.find()
+  Coupon.find({
+    'deletion.isDeleted': false,
+  })
     .then((coupons) => {
       res.status(200).send(coupons);
     })
@@ -88,7 +90,7 @@ router.get('/get/coupon/:slug', async (req, res) => {
 
 router.post('/create', async (req, res) => {
   const {
-    userId,
+    resellerId,
     couponName,
     description,
     featured,
@@ -136,7 +138,7 @@ router.post('/create', async (req, res) => {
       const resultsAsyncTagsArray = await Promise.all(promisesTags);
 
       const newCoupon = new Coupon({
-        reseller: userId,
+        reseller: resellerId,
         couponName,
         slug,
         description,
@@ -257,19 +259,27 @@ router.put('/edit', async (req, res) => {
 });
 
 // Delete Podcast
-router.delete('/delete/coupon/:couponId', async (req, res) => {
+router.put('/delete/coupon/:couponId', async (req, res) => {
   const { couponId } = req.params;
-  console.log('couponId:', couponId);
 
-  try {
-    const productObj = await Coupon.findOne({
+  Coupon.findOneAndUpdate(
+    {
       _id: couponId,
+    },
+    {
+      'deletion.isDeleted': true,
+      'deletion.when': Date.now(),
+    },
+    {
+      runValidators: true,
+    }
+  )
+    .then(() => {
+      res.status(200).send({ ok: true });
+    })
+    .catch((err) => {
+      console.error(err);
     });
-    productObj.remove();
-    res.status(200).send({ ok: true });
-  } catch (err) {
-    console.log(err);
-  }
 });
 
 module.exports = router;
