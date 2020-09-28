@@ -91,6 +91,7 @@ router.get('/:slug', (req, res) => {
 
   Bundle.findOne({
     slug: slug,
+    'deletion.isDeleted': false,
   })
     .populate({
       path: 'products',

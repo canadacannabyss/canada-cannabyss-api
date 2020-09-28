@@ -411,6 +411,7 @@ router.get('/:slug', (req, res) => {
 
   Product.findOne({
     slug: slug,
+    'deletion.isDeleted': false,
   })
     .populate({
       path: 'media',

@@ -59,7 +59,9 @@ router.get('', async (req, res) => {
 });
 
 router.get('/get/all', async (req, res) => {
-  Promotion.find()
+  Promotion.find({
+    'deletion.isDeleted': false,
+  })
     .populate({
       path: 'media',
       model: PromotionMedia,
@@ -77,6 +79,7 @@ router.get('/get/slug/:slug', async (req, res) => {
   const { slug } = req.params;
   Promotion.findOne({
     slug: slug,
+    'deletion.isDeleted': false,
   })
     .populate({
       path: 'products',
@@ -100,6 +103,7 @@ router.get('/:slug', (req, res) => {
 
   Promotion.findOne({
     slug: slug,
+    'deletion.isDeleted': false,
   })
     .populate({
       path: 'media',

@@ -70,6 +70,12 @@ const OrderSchema = new mongoose.Schema({
     required: false,
     default: null,
   },
+  paymentReceipt: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'PaymentReceipt',
+    required: false,
+    default: null,
+  },
   subtotal: {
     type: Number,
     required: true,

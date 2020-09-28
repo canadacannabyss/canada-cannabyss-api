@@ -15,6 +15,7 @@ const Billing = require('../../../models/billing/Billings');
 const PaymentMethod = require('../../../models/paymentMethod/PaymentMethod');
 const Cart = require('../../../models/cart/Cart');
 const Coupon = require('../../../models/coupon/Coupon');
+const PaymentReceipt = require('../../../models/paymentReceipt/PaymentReceipt');
 
 // const authMiddleware = require('../../../middleware/auth');
 
@@ -23,6 +24,7 @@ const Coupon = require('../../../models/coupon/Coupon');
 router.get('', async (req, res) => {
   Order.find({
     completed: true,
+    'deletion.isDeleted': false,
   })
     .populate({
       path: 'customer',
@@ -66,6 +68,7 @@ router.get('/:orderId', async (req, res) => {
   console.log('orderId:', orderId);
   Order.findOne({
     _id: orderId,
+    'deletion.isDeleted': false,
   })
     .populate({
       path: 'cart',
@@ -82,6 +85,10 @@ router.get('/:orderId', async (req, res) => {
     .populate({
       path: 'paymentMethod',
       model: PaymentMethod,
+    })
+    .populate({
+      path: 'paymentReceipt',
+      model: PaymentReceipt,
     })
     .populate({
       path: 'customer',

@@ -16,6 +16,7 @@ const Billing = require('../../../models/billing/Billings');
 const PaymentMethod = require('../../../models/paymentMethod/PaymentMethod');
 const Cart = require('../../../models/cart/Cart');
 const Coupon = require('../../../models/coupon/Coupon');
+const PaymentReceipt = require('../../../models/paymentReceipt/PaymentReceipt');
 
 // const authMiddleware = require('../../../middleware/auth');
 
@@ -24,6 +25,7 @@ const Coupon = require('../../../models/coupon/Coupon');
 app.get('', async (req, res) => {
   Order.find({
     completed: true,
+    'deletion.isDeleted': false,
   })
     .populate({
       path: 'customer',
@@ -50,6 +52,10 @@ app.get('', async (req, res) => {
       model: PaymentMethod,
     })
     .populate({
+      path: 'paymentReceipt',
+      model: PaymentReceipt,
+    })
+    .populate({
       path: 'coupon',
       model: Coupon,
     })
@@ -67,13 +73,90 @@ app.get('/:orderId', async (req, res) => {
   console.log('orderId:', orderId);
   Order.findOne({
     _id: orderId,
+    'deletion.isDeleted': false,
   })
+    .populate({
+      path: 'customer',
+      model: Customer,
+      populate: {
+        path: 'profileImage',
+        model: CustomerProfileImage,
+      },
+    })
+    .populate({
+      path: 'cart',
+      model: Cart,
+    })
+    .populate({
+      path: 'shippingAddress',
+      model: Shipping,
+    })
+    .populate({
+      path: 'billingAddress',
+      model: Billing,
+    })
+    .populate({
+      path: 'paymentMethod',
+      model: PaymentMethod,
+    })
+    .populate({
+      path: 'paymentReceipt',
+      model: PaymentReceipt,
+    })
+    .populate({
+      path: 'coupon',
+      model: Coupon,
+    })
     .then((order) => {
       console.log('order:', order);
       res.status(200).send(order);
     })
     .catch((err) => {
       console.log(err);
+    });
+});
+
+app.put('/update/:orderId', (req, res) => {
+  const { orderId } = req.params;
+  const { shipped, paid } = req.body;
+
+  Order.findOneAndUpdate(
+    {
+      _id: orderId,
+    },
+    {
+      'shipping.status.shipped': shipped,
+      'shipping.status.when': Date.now(),
+      'shipping.status.updated': true,
+      paid: paid,
+    },
+    {
+      runValidators: true,
+    }
+  )
+    .then((updatedOrder) => {
+      Cart.findOneAndUpdate(
+        {
+          _id: updatedOrder.cart,
+        },
+        {
+          paid: paid,
+        },
+        {
+          runValidators: true,
+        }
+      )
+        .then(() => {
+          res.status(200).send({
+            ok: true,
+          });
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    })
+    .catch((err) => {
+      console.error(err);
     });
 });
 

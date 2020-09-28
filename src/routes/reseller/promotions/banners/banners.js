@@ -70,7 +70,7 @@ router.get('/validation/slug/:slug', (req, res) => {
 
 router.post('/publish', async (req, res) => {
   const {
-    userId,
+    resellerId,
     bannerName,
     description,
     promotions,
@@ -114,7 +114,7 @@ router.post('/publish', async (req, res) => {
       const resultsAsyncTagsArray = await Promise.all(promisesTags);
 
       const newBanner = new Banner({
-        reseller: userId,
+        reseller: resellerId,
         bannerName: bannerName,
         slug: slug,
         description: description,
@@ -319,6 +319,7 @@ router.get('/:slug', (req, res) => {
   const { slug } = req.params;
   Banner.findOne({
     slug,
+    'deletion.isDeleted': false,
   })
     .populate({
       path: 'promotions',

@@ -66,7 +66,7 @@ app.get('/get/all/:userId', async (req, res) => {
 
   Shipping.find({
     customer: userId,
-    deleted: false,
+    'deletion.isDeleted': false,
   })
     .then((shipping) => {
       res.json(shipping);

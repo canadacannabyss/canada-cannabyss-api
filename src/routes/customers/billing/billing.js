@@ -64,7 +64,7 @@ app.get('/get/all/:userId', async (req, res) => {
 
   Billing.find({
     customer: userId,
-    deleted: false,
+    'deletion.isDeleted': false,
   })
     .then((billing) => {
       res.json(billing);

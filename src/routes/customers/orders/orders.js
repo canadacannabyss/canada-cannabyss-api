@@ -1,24 +1,21 @@
 const express = require('express');
 
-const app = express();
-const cors = require('cors');
+const router = express.Router();
 const uuidv4 = require('uuid/v4');
+const multer = require('multer');
+
+const multerConfig = require('../../../config/multer');
 
 const GstHst = require('../../../utils/taxes/gstHst');
-
-app.use(cors());
 
 const Order = require('../../../models/order/Order');
 const Shipping = require('../../../models/shipping/Shipping');
 const Billing = require('../../../models/billing/Billings');
 const PaymentMethod = require('../../../models/paymentMethod/PaymentMethod');
 const Cart = require('../../../models/cart/Cart');
+const PaymentReceipt = require('../../../models/paymentReceipt/PaymentReceipt');
 
-// const authMiddleware = require('../../../middleware/auth');
-
-// app.use(authMiddleware);
-
-app.get('/get/orders/user/:userId', async (req, res) => {
+router.get('/get/orders/user/:userId', async (req, res) => {
   const { userId } = req.params;
   Order.find({
     customer: userId,
@@ -49,4 +46,4 @@ app.get('/get/orders/user/:userId', async (req, res) => {
     });
 });
 
-module.exports = app;
+module.exports = router;

@@ -79,6 +79,7 @@ router.get('/get/slug/:slug', async (req, res) => {
   const { slug } = req.params;
   Promotion.findOne({
     slug: slug,
+    'deletion.isDeleted': false,
   })
     .populate({
       path: 'products',
@@ -102,6 +103,7 @@ router.get('/:slug', (req, res) => {
 
   Promotion.findOne({
     slug: slug,
+    'deletion.isDeleted': false,
   })
     .populate({
       path: 'media',

@@ -14,7 +14,7 @@ var db = mongoose.createConnection(process.env.ATLAS_URI_CANADA_CANNABYSS, {
 
 const s3 = new aws.S3();
 
-const OrderPaymentReceiptSchema = new mongoose.Schema({
+const PaymentReceiptSchema = new mongoose.Schema({
   id: String,
   name: String,
   size: Number,
@@ -41,13 +41,13 @@ const OrderPaymentReceiptSchema = new mongoose.Schema({
   },
 });
 
-OrderPaymentReceiptSchema.pre('save', function () {
+PaymentReceiptSchema.pre('save', function () {
   if (!this.url) {
     this.url = `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${this.key}`;
   }
 });
 
-OrderPaymentReceiptSchema.pre('remove', function () {
+PaymentReceiptSchema.pre('remove', function () {
   if (process.env.STORAGE_TYPE === 's3') {
     return s3
       .deleteObject({
@@ -67,9 +67,6 @@ OrderPaymentReceiptSchema.pre('remove', function () {
   );
 });
 
-const OrderPaymentReceipt = db.model(
-  'OrderPaymentReceipt',
-  OrderPaymentReceiptSchema
-);
+const PaymentReceipt = db.model('PaymentReceipt', PaymentReceiptSchema);
 
-module.exports = OrderPaymentReceipt;
+module.exports = PaymentReceipt;

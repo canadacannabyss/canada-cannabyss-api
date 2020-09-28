@@ -62,6 +62,7 @@ app.get('/panel/get/:slug', (req, res) => {
   const { slug } = req.params;
   Category.findOne({
     slug,
+    'deletion.isDeleted': false,
   })
     .populate({
       path: 'media',

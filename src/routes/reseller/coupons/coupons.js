@@ -70,6 +70,7 @@ router.get('/get/coupon/:slug', async (req, res) => {
 
   Coupon.findOne({
     slug,
+    'deletion.isDeleted': false,
   })
     .populate({
       path: 'organization.categories',

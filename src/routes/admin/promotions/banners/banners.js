@@ -323,6 +323,7 @@ router.get('/:slug', (req, res) => {
   const { slug } = req.params;
   Banner.findOne({
     slug,
+    'deletion.isDeleted': false,
   })
     .populate({
       path: 'promotions',

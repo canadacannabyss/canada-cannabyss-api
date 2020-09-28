@@ -1,16 +1,13 @@
 const express = require('express');
 
 const router = express.Router();
-const cors = require('cors');
 const uuidv4 = require('uuid/v4');
 const multer = require('multer');
 
-const multerConfig = require('../../../config/multer');
+const multerConfig = require('../../../config/multerPaymentReceipt');
 
 const GstHst = require('../../../utils/taxes/gstHst');
 const PStRst = require('../../../utils/taxes/pstRst');
-
-router.use(cors());
 
 const Order = require('../../../models/order/Order');
 
@@ -28,7 +25,7 @@ const Billing = require('../../../models/billing/Billings');
 
 const PaymentMethod = require('../../../models/paymentMethod/PaymentMethod');
 
-const OrderPaymentReceipt = require('../../../models/order/OrderPaymentReceipt');
+const PaymentReceipt = require('../../../models/paymentReceipt/PaymentReceipt');
 
 const PstRst = require('../../../utils/taxes/pstRst');
 
@@ -677,7 +674,9 @@ router.put('/update/payment-method', async (req, res) => {
 });
 
 router.put('/update/completed', async (req, res) => {
-  const { orderId } = req.body;
+  const { orderId, imageObj } = req.body;
+
+  console.log('req.body:', req.body);
 
   try {
     await Order.findOneAndUpdate(
@@ -687,6 +686,7 @@ router.put('/update/completed', async (req, res) => {
       {
         completed: true,
         purchasedAt: Date.now(),
+        paymentReceipt: imageObj[0],
       },
       {
         runValidators: true,
@@ -722,6 +722,29 @@ router.post(
       });
 
       return res.json(orderPaymentReceipt);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+);
+
+router.post(
+  '/create/payment-receipt',
+  multer(multerConfig).single('file'),
+  async (req, res) => {
+    try {
+      const { originalname: name, size, key, location: url = '' } = req.file;
+      const id = uuidv4();
+
+      const paymentReceipt = await PaymentReceipt.create({
+        id,
+        name,
+        size,
+        key,
+        url,
+      });
+
+      return res.json(paymentReceipt);
     } catch (err) {
       console.log(err);
     }

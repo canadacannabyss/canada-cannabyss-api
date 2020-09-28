@@ -34,7 +34,9 @@ const verifyValidSlug = async (slug) => {
 };
 
 router.get('/get/all', async (req, res) => {
-  Coupon.find()
+  Coupon.find({
+    'deletion.isDeleted': false,
+  })
     .then((coupons) => {
       res.status(200).send(coupons);
     })
@@ -68,6 +70,7 @@ router.get('/get/coupon/:slug', async (req, res) => {
 
   Coupon.findOne({
     slug,
+    'deletion.isDeleted': false,
   })
     .populate({
       path: 'organization.categories',
