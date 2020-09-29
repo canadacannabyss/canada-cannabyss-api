@@ -111,6 +111,11 @@ const OrderSchema = new mongoose.Schema({
     required: false,
     default: false,
   },
+  canceled: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
   deletion: {
     isDeleted: {
       type: Boolean,

@@ -118,7 +118,7 @@ app.get('/:orderId', async (req, res) => {
 
 app.put('/update/:orderId', (req, res) => {
   const { orderId } = req.params;
-  const { shipped, paid } = req.body;
+  const { shipped, paid, canceled } = req.body;
 
   Order.findOneAndUpdate(
     {
@@ -128,6 +128,7 @@ app.put('/update/:orderId', (req, res) => {
       'shipping.status.shipped': shipped,
       'shipping.status.when': Date.now(),
       'shipping.status.updated': true,
+      canceled: canceled,
       paid: paid,
     },
     {
