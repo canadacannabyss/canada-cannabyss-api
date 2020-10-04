@@ -101,6 +101,8 @@ router.get('/get/cryptocurrencies', async (req, res) => {
 
     const resultPromisedWithLogo = await Promise.all(promisedWithLogo);
 
+    console.log('resultPromisedWithLogo:', resultPromisedWithLogo);
+
     const finalResult = resultPromisedWithLogo.map((test, index) => {
       return {
         index: index,
