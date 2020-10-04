@@ -55,7 +55,6 @@ const getCryptocurrencyies = async (limit, sort) => {
   );
 
   const data = await response.json();
-  console.log('getCryptocurrencyies:', data);
   return data;
 };
 
@@ -97,12 +96,11 @@ router.get('/get/cryptocurrencies', async (req, res) => {
 
     const promisedWithLogo = promised[0].data.map(async (promise) => {
       const func = await getCryptocurrencyiesInfo(promise.symbol);
+
       return func;
     });
 
     const resultPromisedWithLogo = await Promise.all(promisedWithLogo);
-
-    console.log('resultPromisedWithLogo:', resultPromisedWithLogo);
 
     const finalResult = resultPromisedWithLogo.map((test, index) => {
       return {
