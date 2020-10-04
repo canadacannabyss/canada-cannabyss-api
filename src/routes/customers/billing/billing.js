@@ -101,6 +101,7 @@ app.put('/edit/:billingId', async (req, res) => {
       addressLine1: addressLine1,
       addressLine2: addressLine2,
       postalCode: postalCode,
+      updatedOn: Date.now(),
     },
     {
       runValidators: true,

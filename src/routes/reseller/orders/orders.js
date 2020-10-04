@@ -130,6 +130,7 @@ app.put('/update/:orderId', (req, res) => {
       'shipping.status.updated': true,
       canceled: canceled,
       paid: paid,
+      updatedOn: Date.now(),
     },
     {
       runValidators: true,
@@ -142,6 +143,7 @@ app.put('/update/:orderId', (req, res) => {
         },
         {
           paid: paid,
+          updatedOn: Date.now(),
         },
         {
           runValidators: true,
@@ -173,6 +175,7 @@ app.put('/update/status/shipping', async (req, res) => {
         'shipping.status.shipped': newShippingStatus,
         'shipping.status.when': Date.now(),
         'shipping.status.updated': true,
+        updatedOn: Date.now(),
       },
       {
         runValidators: true,
@@ -206,6 +209,7 @@ app.put('/update/status/paid', async (req, res) => {
       },
       {
         paid: newPaymentStatus,
+        updatedOn: Date.now(),
       },
       {
         runValidators: true,

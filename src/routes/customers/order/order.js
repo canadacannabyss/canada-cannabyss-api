@@ -29,10 +29,6 @@ const PaymentReceipt = require('../../../models/paymentReceipt/PaymentReceipt');
 
 const PstRst = require('../../../utils/taxes/pstRst');
 
-// const authMiddleware = require('../../../middleware/auth');
-
-// router.use(authMiddleware);
-
 const roundFloatNumber = (number) => {
   return Math.round((number + Number.EPSILON) * 100) / 100;
 };
@@ -282,6 +278,7 @@ router.put('/coupon/apply', async (req, res) => {
         },
         {
           coupon: coupon._id,
+          updatedOn: Date.now(),
         },
         {
           runValidators: true,
@@ -333,6 +330,7 @@ router.put('/update/shipping/handling', async (req, res) => {
           {
             'shipping.shippingHandling': 0,
             'shipping.freeShippingApplied': true,
+            updatedOn: Date.now(),
           },
           {
             runValidators: true,
@@ -346,6 +344,7 @@ router.put('/update/shipping/handling', async (req, res) => {
           {
             'shipping.shippingHandling': 8.99,
             'shipping.freeShippingApplied': false,
+            updatedOn: Date.now(),
           },
           {
             runValidators: true,
@@ -360,6 +359,7 @@ router.put('/update/shipping/handling', async (req, res) => {
         {
           'shipping.shippingHandling': 8.99,
           'shipping.freeShippingApplied': false,
+          updatedOn: Date.now(),
         },
         {
           runValidators: true,
@@ -376,6 +376,7 @@ router.put('/update/shipping/handling', async (req, res) => {
           {
             'shipping.shippingHandling': 0,
             'shipping.freeShippingApplied': true,
+            updatedOn: Date.now(),
           },
           {
             runValidators: true,
@@ -415,6 +416,7 @@ router.put('/reset/shipping/handling', async (req, res) => {
       {
         'shipping.shippingHandling': roundFloatNumber(0),
         'shipping.freeShippingApplied': false,
+        updatedOn: Date.now(),
       },
       {
         runValidators: true,
@@ -450,6 +452,7 @@ router.put('/update/total/before-tax', async (req, res) => {
         totalBeforeTax: roundFloatNumber(
           orderObj.subtotal + orderObj.shipping.shippingHandling
         ),
+        updatedOn: Date.now(),
       },
       {
         runValidators: true,
@@ -486,6 +489,7 @@ router.put('/update/tax/gsthst', async (req, res) => {
       },
       {
         gstHst: gsthstTax,
+        updatedOn: Date.now(),
       },
       {
         runValidators: true,
@@ -529,6 +533,7 @@ router.put('/update/tax/pstrst', async (req, res) => {
         },
         {
           pstRst: pstrstTax,
+          updatedOn: Date.now(),
         },
         {
           runValidators: true,
@@ -566,6 +571,7 @@ router.put('/update/total', async (req, res) => {
       },
       {
         total: total,
+        updatedOn: Date.now(),
       },
       {
         runValidators: true,
@@ -584,6 +590,35 @@ router.put('/update/total', async (req, res) => {
   }
 });
 
+router.put('/update/total/cryptocurrency', async (req, res) => {
+  const { orderId, totalInCryptocurrency } = req.body;
+
+  try {
+    await Order.findOneAndUpdate(
+      {
+        _id: orderId,
+      },
+      {
+        totalInCryptocurrency: totalInCryptocurrency,
+        updatedOn: Date.now(),
+      },
+      {
+        runValidators: true,
+      }
+    )
+      .then((order) => {
+        res.status(200).send({
+          totalInCryptocurrency: order.totalInCryptocurrency,
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 router.put('/update/shipping', async (req, res) => {
   const { orderId, shippingAddressId } = req.body;
 
@@ -594,6 +629,7 @@ router.put('/update/shipping', async (req, res) => {
       },
       {
         shippingAddress: shippingAddressId,
+        updatedOn: Date.now(),
       },
       {
         runValidators: true,
@@ -624,6 +660,7 @@ router.put('/update/billing', async (req, res) => {
       },
       {
         billingAddress: billingAddressId,
+        updatedOn: Date.now(),
       },
       {
         runValidators: true,
@@ -654,6 +691,7 @@ router.put('/update/payment-method', async (req, res) => {
       },
       {
         paymentMethod: paymentMethodId,
+        updatedOn: Date.now(),
       },
       {
         runValidators: true,
@@ -674,9 +712,10 @@ router.put('/update/payment-method', async (req, res) => {
 });
 
 router.put('/update/completed', async (req, res) => {
-  const { orderId, imageObj } = req.body;
+  const { orderId, imageObj, totalInFiat } = req.body;
 
-  console.log('req.body:', req.body);
+  console.log('imageObj:', imageObj);
+  console.log('imageObj[0]:', imageObj[0]);
 
   try {
     await Order.findOneAndUpdate(
@@ -687,6 +726,8 @@ router.put('/update/completed', async (req, res) => {
         completed: true,
         purchasedAt: Date.now(),
         paymentReceipt: imageObj[0],
+        totalInCryptocurrency: totalInFiat,
+        updatedOn: Date.now(),
       },
       {
         runValidators: true,

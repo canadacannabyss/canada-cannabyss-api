@@ -129,6 +129,7 @@ router.get('/validation/slug/:slug', (req, res) => {
 router.post('/publish', async (req, res) => {
   const {
     media,
+    reseller,
     isSlugValid,
     categoryName,
     featured,
@@ -190,6 +191,7 @@ router.post('/publish', async (req, res) => {
     if (await verifyValidSlug(slug)) {
       const newCategory = new Category({
         media,
+        reseller,
         categoryName,
         featured,
         slug,
@@ -257,6 +259,7 @@ router.put('/update/:id', async (req, res) => {
           slug: seo.slug,
           description: seo.description,
         },
+        updatedOn: Date.now(),
       },
       {
         runValidators: true,

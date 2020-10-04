@@ -119,7 +119,7 @@ router.post('/create', async (req, res) => {
           let categoryObj = await getCategory(category);
 
           if (_.isEmpty(categoryObj)) {
-            categoryObj = await createCategory(category);
+            categoryObj = await createCategory(category, reseller);
           }
           return categoryObj;
         }
@@ -176,7 +176,6 @@ router.post('/create', async (req, res) => {
 
 router.put('/edit', async (req, res) => {
   const {
-    userId,
     reseller,
     id,
     couponName,
@@ -203,7 +202,7 @@ router.put('/edit', async (req, res) => {
       let categoryObj = await getCategory(category);
 
       if (_.isEmpty(categoryObj)) {
-        categoryObj = await createCategory(category);
+        categoryObj = await createCategory(category, reseller);
       }
       return categoryObj;
     });

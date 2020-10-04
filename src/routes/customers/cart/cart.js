@@ -204,6 +204,7 @@ app.put('/update/completed', async (req, res) => {
       },
       {
         completed: true,
+        updatedOn: Date.now(),
       },
       {
         runValidators: true,
@@ -241,6 +242,7 @@ app.put('/update/purchased', async (req, res) => {
           },
           {
             'inventory.quantity': productObj.inventory.quantity - item.quantity,
+            updatedOn: Date.now(),
           },
           {
             runValidators: true,
@@ -256,6 +258,7 @@ app.put('/update/purchased', async (req, res) => {
           },
           {
             'inventory.quantity': bundleObj.inventory.quantity - item.quantity,
+            updatedOn: Date.now(),
           },
           {
             runValidators: true,

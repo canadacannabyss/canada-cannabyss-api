@@ -72,7 +72,7 @@ router.get('/validation/slug/:slug', (req, res) => {
 
 router.post('/publish', async (req, res) => {
   const {
-    userId,
+    reseller,
     bannerName,
     description,
     promotions,
@@ -96,7 +96,7 @@ router.post('/publish', async (req, res) => {
           let categoryObj = await getCategory(category);
 
           if (_.isEmpty(categoryObj)) {
-            categoryObj = await createCategory(category);
+            categoryObj = await createCategory(category, reseller);
           }
           return categoryObj;
         }
@@ -116,7 +116,7 @@ router.post('/publish', async (req, res) => {
       const resultsAsyncTagsArray = await Promise.all(promisesTags);
 
       const newBanner = new Banner({
-        reseller: userId,
+        reseller,
         bannerName: bannerName,
         slug: slug,
         description: description,
@@ -207,7 +207,7 @@ router.put('/update/:id', async (req, res) => {
           let categoryObj = await getCategory(category);
 
           if (_.isEmpty(categoryObj)) {
-            categoryObj = await createCategory(category);
+            categoryObj = await createCategory(category, reseller);
           }
           return categoryObj;
         }

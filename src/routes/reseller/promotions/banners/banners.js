@@ -94,7 +94,7 @@ router.post('/publish', async (req, res) => {
           let categoryObj = await getCategory(category);
 
           if (_.isEmpty(categoryObj)) {
-            categoryObj = await createCategory(category);
+            categoryObj = await createCategory(category, resellerId);
           }
           return categoryObj;
         }
@@ -184,6 +184,7 @@ router.delete('/delete/banner/:bannerId', async (req, res) => {
 router.put('/update/:id', async (req, res) => {
   const {
     bannerName,
+    resellerId,
     description,
     featured,
     promotions,
@@ -204,7 +205,7 @@ router.put('/update/:id', async (req, res) => {
           let categoryObj = await getCategory(category);
 
           if (_.isEmpty(categoryObj)) {
-            categoryObj = await createCategory(category);
+            categoryObj = await createCategory(category, resellerId);
           }
           return categoryObj;
         }
@@ -228,6 +229,7 @@ router.put('/update/:id', async (req, res) => {
           _id: id,
         },
         {
+          reseller: resellerId,
           bannerName: bannerName,
           slug: slug,
           description: description,

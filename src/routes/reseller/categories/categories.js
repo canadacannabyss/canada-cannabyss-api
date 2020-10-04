@@ -259,6 +259,7 @@ router.put('/update/:id', async (req, res) => {
           slug: seo.slug,
           description: seo.description,
         },
+        updatedOn: Date.now(),
       },
       {
         runValidators: true,

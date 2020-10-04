@@ -28,11 +28,14 @@ app.get('/all/:userId', async (req, res) => {
 });
 
 app.post('/e-transfer/create', async (req, res) => {
-  const { userId } = req.body;
+  const { userId, recipient } = req.body;
 
   const newPaymentMethod = new PaymentMethod({
     customer: userId,
-    eTransfer: true,
+    eTransfer: {
+      recipient: recipient,
+      isETransfer: true,
+    },
   });
 
   newPaymentMethod
@@ -45,11 +48,17 @@ app.post('/e-transfer/create', async (req, res) => {
     });
 });
 
-app.get('/e-transfer/get/by/user/:userId', async (req, res) => {
-  const { userId } = req.params;
+app.get('/e-transfer/get/by/user/:userId/:recipient', async (req, res) => {
+  const { userId, recipient } = req.params;
   PaymentMethod.findOne({
     customer: userId,
-    eTransfer: true,
+    eTransfer: {
+      recipient: recipient,
+      isETransfer: true,
+    },
+    deletion: {
+      isDeleted: false,
+    },
   })
     .then((paymentMethod) => {
       let paymentMethodObj = {};
@@ -76,8 +85,11 @@ app.post('/cryptocurrency/create', async (req, res) => {
     customer: userId,
     eTransfer: false,
     cryptocurrency: {
+      logo: cryptocurrency.logo,
       symbol: cryptocurrency.symbol,
-      address: cryptocurrency.address,
+      name: cryptocurrency.name,
+      customerAddress: cryptocurrency.customerAddress,
+      companyAddress: cryptocurrency.companyAddress,
     },
   });
 
@@ -93,15 +105,17 @@ app.post('/cryptocurrency/create', async (req, res) => {
 
 app.get('/cryptocurrency/get/by/user/:userId', async (req, res) => {
   const { userId } = req.params;
-  const { symbol, address } = req.query;
-  console.log('symbol:', symbol);
-  console.log('address:', address);
+  const { logo, symbol, name, customerAddress, companyAddress } = req.query;
+  console.log('req.body:', req.query);
   PaymentMethod.findOne({
     customer: userId,
     eTransfer: false,
     cryptocurrency: {
-      symbol: symbol,
-      address: address,
+      logo,
+      symbol,
+      name,
+      customerAddress,
+      companyAddress,
     },
   })
     .then((paymentMethod) => {

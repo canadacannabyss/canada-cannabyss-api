@@ -92,6 +92,11 @@ app.use(
   '/admin/promotions/banners',
   require('./routes/admin/promotions/banners/banners')
 );
+app.use(
+  '/admin/cryptocurrencies',
+  require('./routes/admin/cryptocurrencies/cryptocurrencies')
+);
+app.use('/admin/e-transfers', require('./routes/admin/e-transfers/e-transfer'));
 app.use('/admin/category', require('./routes/admin/category/category'));
 app.use('/admin/categories', require('./routes/admin/categories/categories'));
 app.use('/admin/orders', require('./routes/admin/orders/orders'));

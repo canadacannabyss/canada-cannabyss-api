@@ -4,13 +4,14 @@ const _ = require('lodash');
 
 const fetch = require('node-fetch');
 
-const AcceptedPaymentMethod = require('../../models/acceptedPaymentMethod/AcceptedPaymentMethod');
-const Admin = require('../../models/admin/Admin');
+const AcceptedPaymentMethod = require('../../../models/acceptedPaymentMethod/AcceptedPaymentMethod');
+const Admin = require('../../../models/admin/Admin');
 
 const verifyValidSymbol = async (symbol) => {
   try {
     const crypto = await AcceptedPaymentMethod.find({
-      symbol,
+      'cryptocurrency.symbol': symbol,
+      'deletion.isDeleted': false,
     });
     console.log('crypto:', crypto);
     if (!_.isEmpty(crypto)) {
@@ -77,6 +78,7 @@ const getCryptocurrencyiesInfo = async (symbol) => {
 router.get('', (req, res) => {
   AcceptedPaymentMethod.find({
     type: 'cryptocurrency',
+    'deletion.isDeleted': false,
   })
     .then((acceptedPaymentMethods) => {
       res.status(200).send(acceptedPaymentMethods);
@@ -135,23 +137,97 @@ router.get('/get/price', async (req, res) => {
 router.post('/get/total/cryptocurrency', async (req, res) => {
   const { totalInFiat, cryptocurrencySymbol } = req.body;
 
-  const cryptocurrencyPrice = await getCurrentCryptocurrencyPrice(
-    cryptocurrencySymbol
-  );
-  const totalInCryptocurrency = (
-    totalInFiat / cryptocurrencyPrice.data[cryptocurrencySymbol].quote.CAD.price
-  ).toFixed(8);
+  let cryptocurrencyPrice;
+  let totalInCryptocurrency;
+
+  if (cryptocurrencySymbol === 'BTC') {
+    cryptocurrencyPrice = await getCurrentCryptocurrencyPrice('BTC');
+    totalInCryptocurrency = (
+      totalInFiat / cryptocurrencyPrice.data.BTC.quote.CAD.price
+    ).toFixed(8);
+  } else if (cryptocurrencySymbol === 'ETH') {
+    cryptocurrencyPrice = await getCurrentCryptocurrencyPrice('ETH');
+    totalInCryptocurrency = (
+      totalInFiat / cryptocurrencyPrice.data.ETH.quote.CAD.price
+    ).toFixed(8);
+  }
 
   console.log('totalInCryptocurrency:', totalInCryptocurrency);
   res.status(200).send({ totalInCryptocurrency });
 });
 
-router.get('/validation/symbol/:symbol', async (req, res) => {
+router.get('/validation/symbol/:symbol', (req, res) => {
   const { symbol } = req.params;
-  const verificationRes = await verifyValidSymbol(symbol);
+  const verificationRes = verifyValidSymbol(symbol);
   res.json({
     valid: verificationRes,
   });
+});
+
+router.get('/:symbol', (req, res) => {
+  const { symbol } = req.params;
+  console.log('sybol:', symbol);
+
+  AcceptedPaymentMethod.findOne({
+    'cryptocurrency.symbol': symbol,
+    'deletion.isDeleted': false,
+  })
+    .then((acceptedPaymentMethod) => {
+      console.log('acceptedPaymentMethod:', acceptedPaymentMethod);
+      res.status(200).send(acceptedPaymentMethod);
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+});
+
+router.post('/create', (req, res) => {
+  const { logo, symbol, name, address, admin } = req.body;
+
+  const newAcceptedPaymentMethod = new AcceptedPaymentMethod({
+    admin,
+    type: 'cryptocurrency',
+    cryptocurrency: {
+      logo,
+      symbol,
+      name,
+      address,
+    },
+  });
+
+  newAcceptedPaymentMethod
+    .save()
+    .then(() => {
+      res.status(201).send({
+        ok: true,
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+});
+
+router.put('/delete/cryptocurrency/:id', (req, res) => {
+  const { id } = req.params;
+
+  AcceptedPaymentMethod.findOneAndUpdate(
+    {
+      _id: id,
+    },
+    {
+      'deletion.isDeleted': true,
+      'deletion.when': Date.now(),
+    },
+    {
+      runValidators: true,
+    }
+  )
+    .then(() => {
+      res.status(200).send({ ok: true });
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 });
 
 module.exports = router;

@@ -138,7 +138,7 @@ router.get('/validation/slug/:slug', (req, res) => {
 
 router.post('/publish', async (req, res) => {
   const {
-    userId,
+    reseller,
     products,
     isSlugValid,
     variants,
@@ -166,7 +166,7 @@ router.post('/publish', async (req, res) => {
           let categoryObj = await getCategory(category);
 
           if (_.isEmpty(categoryObj)) {
-            categoryObj = await createCategory(category);
+            categoryObj = await createCategory(category, reseller);
           }
           return categoryObj;
         }
@@ -186,7 +186,7 @@ router.post('/publish', async (req, res) => {
       const resultsAsyncTagsArray = await Promise.all(promisesTags);
 
       const newBundle = new Bundle({
-        reseller: userId,
+        reseller,
         products: products,
         variants,
         bundleName,
@@ -287,7 +287,7 @@ router.put('/update/:id', async (req, res) => {
           let categoryObj = await getCategory(category);
 
           if (_.isEmpty(categoryObj)) {
-            categoryObj = await createCategory(category);
+            categoryObj = await createCategory(category, reseller);
           }
           return categoryObj;
         }

@@ -136,6 +136,7 @@ app.get('/validation/slug/:slug', (req, res) => {
 app.post('/publish', async (req, res) => {
   const {
     media,
+    resellerId,
     isSlugValid,
     categoryName,
     featured,
@@ -197,6 +198,7 @@ app.post('/publish', async (req, res) => {
     if (await verifyValidSlug(slug)) {
       const newCategory = new Category({
         media,
+        reseller: resellerId,
         categoryName,
         featured,
         slug,
@@ -221,7 +223,14 @@ app.post('/publish', async (req, res) => {
 });
 
 app.put('/update/:id', async (req, res) => {
-  const { media, categoryName, featured, description, seo } = req.body;
+  const {
+    resellerId,
+    media,
+    categoryName,
+    featured,
+    description,
+    seo,
+  } = req.body;
   const { id } = req.params;
 
   console.log(media, categoryName, featured, description, seo);
@@ -254,6 +263,7 @@ app.put('/update/:id', async (req, res) => {
         _id: id,
       },
       {
+        reseller: resellerId,
         media: newMedia,
         categoryName: categoryName,
         slug: slug,
@@ -264,6 +274,7 @@ app.put('/update/:id', async (req, res) => {
           slug: seo.slug,
           description: seo.description,
         },
+        updatedOn: Date.now(),
       },
       {
         runValidators: true,

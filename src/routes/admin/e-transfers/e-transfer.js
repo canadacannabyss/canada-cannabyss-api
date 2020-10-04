@@ -4,13 +4,14 @@ const _ = require('lodash');
 
 const fetch = require('node-fetch');
 
-const AcceptedPaymentMethod = require('../../models/acceptedPaymentMethod/AcceptedPaymentMethod');
-const Admin = require('../../models/admin/Admin');
+const AcceptedPaymentMethod = require('../../../models/acceptedPaymentMethod/AcceptedPaymentMethod');
+const Admin = require('../../../models/admin/Admin');
 
-const verifyValidSymbol = async (symbol) => {
+const verifyValidETransfer = async (recipientEmail) => {
   try {
     const crypto = await AcceptedPaymentMethod.find({
-      symbol,
+      'eTransfer.recipient': recipientEmail,
+      'deletion.isDeleted': false,
     });
     console.log('crypto:', crypto);
     if (!_.isEmpty(crypto)) {
@@ -76,7 +77,8 @@ const getCryptocurrencyiesInfo = async (symbol) => {
 
 router.get('', (req, res) => {
   AcceptedPaymentMethod.find({
-    type: 'cryptocurrency',
+    type: 'e-transfer',
+    'deletion.isDeleted': false,
   })
     .then((acceptedPaymentMethods) => {
       res.status(200).send(acceptedPaymentMethods);
@@ -124,34 +126,81 @@ router.get('/get/btc/price', async (req, res) => {
   res.json(btcPrice.data.BTC.quote.CAD.price);
 });
 
-router.get('/get/price', async (req, res) => {
-  const { symbol } = req.query;
-
-  const cryptoPrice = await getCurrentCryptocurrencyPrice(symbol);
-  console.log('data:', cryptoPrice);
-  res.json(cryptoPrice.data[symbol].quote.CAD.price);
-});
-
 router.post('/get/total/cryptocurrency', async (req, res) => {
   const { totalInFiat, cryptocurrencySymbol } = req.body;
 
-  const cryptocurrencyPrice = await getCurrentCryptocurrencyPrice(
-    cryptocurrencySymbol
-  );
-  const totalInCryptocurrency = (
-    totalInFiat / cryptocurrencyPrice.data[cryptocurrencySymbol].quote.CAD.price
-  ).toFixed(8);
+  let cryptocurrencyPrice;
+  let totalInCryptocurrency;
+
+  if (cryptocurrencySymbol === 'BTC') {
+    cryptocurrencyPrice = await getCurrentCryptocurrencyPrice('BTC');
+    totalInCryptocurrency = (
+      totalInFiat / cryptocurrencyPrice.data.BTC.quote.CAD.price
+    ).toFixed(8);
+  } else if (cryptocurrencySymbol === 'ETH') {
+    cryptocurrencyPrice = await getCurrentCryptocurrencyPrice('ETH');
+    totalInCryptocurrency = (
+      totalInFiat / cryptocurrencyPrice.data.ETH.quote.CAD.price
+    ).toFixed(8);
+  }
 
   console.log('totalInCryptocurrency:', totalInCryptocurrency);
   res.status(200).send({ totalInCryptocurrency });
 });
 
-router.get('/validation/symbol/:symbol', async (req, res) => {
-  const { symbol } = req.params;
-  const verificationRes = await verifyValidSymbol(symbol);
+router.get('/validation/recipientEmail/:recipientEmail', async (req, res) => {
+  const { recipientEmail } = req.params;
+  const verificationRes = await verifyValidETransfer(recipientEmail);
+  console.log('verificationRes:', verificationRes);
   res.json({
     valid: verificationRes,
   });
+});
+
+router.post('/create', (req, res) => {
+  const { recipient, admin } = req.body;
+
+  const newAcceptedPaymentMethod = new AcceptedPaymentMethod({
+    admin,
+    type: 'e-transfer',
+    eTransfer: {
+      recipient,
+    },
+  });
+
+  newAcceptedPaymentMethod
+    .save()
+    .then(() => {
+      res.status(201).send({
+        ok: true,
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+});
+
+router.put('/delete/e-transfer/:id', (req, res) => {
+  const { id } = req.params;
+
+  AcceptedPaymentMethod.findOneAndUpdate(
+    {
+      _id: id,
+    },
+    {
+      'deletion.isDeleted': true,
+      'deletion.when': Date.now(),
+    },
+    {
+      runValidators: true,
+    }
+  )
+    .then(() => {
+      res.status(200).send({ ok: true });
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 });
 
 module.exports = router;

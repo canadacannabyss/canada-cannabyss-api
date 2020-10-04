@@ -18,9 +18,10 @@ module.exports = {
       return {};
     }
   },
-  createCategory: async (category) => {
+  createCategory: async (category, reseller) => {
     const slug = slugifyString(category);
     const newCategory = new Category({
+      reseller,
       categoryName: category,
       slug,
       howManyViewed: 0,

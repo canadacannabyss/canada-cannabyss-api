@@ -6,23 +6,15 @@ var db = mongoose.createConnection(process.env.ATLAS_URI_CANADA_CANNABYSS, {
   useUnifiedTopology: true,
 });
 
-const PaymentMethodSchema = new mongoose.Schema({
-  customer: {
+const AcceptedPaymentMethodSchema = new mongoose.Schema({
+  admin: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Customer',
+    ref: 'Admin',
     required: true,
   },
-  card: {
-    provider: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    id: {
-      type: String,
-      required: false,
-      default: null,
-    },
+  type: {
+    type: String,
+    required: true,
   },
   cryptocurrency: {
     logo: {
@@ -40,12 +32,7 @@ const PaymentMethodSchema = new mongoose.Schema({
       required: false,
       default: null,
     },
-    customerAddress: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    companyAddress: {
+    address: {
       type: String,
       required: false,
       default: null,
@@ -54,11 +41,6 @@ const PaymentMethodSchema = new mongoose.Schema({
   eTransfer: {
     recipient: {
       type: String,
-      required: false,
-      default: null,
-    },
-    isETransfer: {
-      type: Boolean,
       required: false,
       default: null,
     },
@@ -85,6 +67,9 @@ const PaymentMethodSchema = new mongoose.Schema({
   },
 });
 
-const PaymentMethod = db.model('PaymentMethod', PaymentMethodSchema);
+const AcceptedPaymentMethod = db.model(
+  'AcceptedPaymentMethod',
+  AcceptedPaymentMethodSchema
+);
 
-module.exports = PaymentMethod;
+module.exports = AcceptedPaymentMethod;

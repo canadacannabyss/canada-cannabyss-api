@@ -101,6 +101,11 @@ const OrderSchema = new mongoose.Schema({
     required: true,
     default: 0,
   },
+  totalInCryptocurrency: {
+    type: Number,
+    required: false,
+    default: null,
+  },
   paid: {
     type: Boolean,
     required: true,

@@ -189,7 +189,7 @@ router.post('/publish', async (req, res) => {
           let categoryObj = await getCategory(category);
 
           if (_.isEmpty(categoryObj)) {
-            categoryObj = await createCategory(category);
+            categoryObj = await createCategory(category, userId);
           }
           return categoryObj;
         }
@@ -277,6 +277,7 @@ router.post('/set/global-variable', async (req, res) => {
 router.put('/update/:id', async (req, res) => {
   const {
     media,
+    userId,
     promotionName,
     description,
     products,
@@ -313,7 +314,7 @@ router.put('/update/:id', async (req, res) => {
       let categoryObj = await getCategory(category);
 
       if (_.isEmpty(categoryObj)) {
-        categoryObj = await createCategory(category);
+        categoryObj = await createCategory(category, userId);
       }
       return categoryObj;
     });
@@ -337,6 +338,7 @@ router.put('/update/:id', async (req, res) => {
       },
       {
         media: newMedia,
+        reseller: userId,
         promotionName: promotionName,
         slug: slug,
         description: description,
