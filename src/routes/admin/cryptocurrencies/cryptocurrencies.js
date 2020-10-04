@@ -55,6 +55,7 @@ const getCryptocurrencyies = async (limit, sort) => {
   );
 
   const data = await response.json();
+  console.log('getCryptocurrencyies:', data);
   return data;
 };
 
