@@ -91,27 +91,32 @@ router.get('', (req, res) => {
 router.get('/get/cryptocurrencies', async (req, res) => {
   const { limit, sort } = req.query;
 
-  const promised = await Promise.all([getCryptocurrencyies(limit, sort)]);
+  try {
+    const promised = await Promise.all([getCryptocurrencyies(limit, sort)]);
 
-  const promisedWithLogo = promised[0].data.map(async (promise) => {
-    const func = await getCryptocurrencyiesInfo(promise.symbol);
-    return func;
-  });
+    const promisedWithLogo = promised[0].data.map(async (promise) => {
+      const func = await getCryptocurrencyiesInfo(promise.symbol);
+      return func;
+    });
 
-  const resultPromisedWithLogo = await Promise.all(promisedWithLogo);
+    const resultPromisedWithLogo = await Promise.all(promisedWithLogo);
 
-  const finalResult = resultPromisedWithLogo.map((test, index) => {
-    return {
-      index: index,
-      symbol: promised[0].data[index].symbol,
-      name: promised[0].data[index].name,
-      logo: test.data[Object.keys(test.data)[0]].logo,
-    };
-  });
+    const finalResult = resultPromisedWithLogo.map((test, index) => {
+      return {
+        index: index,
+        symbol: promised[0].data[index].symbol,
+        name: promised[0].data[index].name,
+        logo: test.data[Object.keys(test.data)[0]].logo,
+      };
+    });
 
-  res.json({
-    data: finalResult,
-  });
+    res.json({
+      data: finalResult,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(200).send({});
+  }
 });
 
 router.get('/get/eth/price', async (req, res) => {
