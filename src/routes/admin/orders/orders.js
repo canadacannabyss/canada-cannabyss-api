@@ -16,6 +16,7 @@ const PaymentMethod = require('../../../models/paymentMethod/PaymentMethod');
 const Cart = require('../../../models/cart/Cart');
 const Coupon = require('../../../models/coupon/Coupon');
 const PaymentReceipt = require('../../../models/paymentReceipt/PaymentReceipt');
+const PostalService = require('../../../models/postalService/postalService');
 
 // const authMiddleware = require('../../../middleware/auth');
 
@@ -91,8 +92,16 @@ router.get('/:orderId', async (req, res) => {
       model: PaymentReceipt,
     })
     .populate({
+      path: 'coupon',
+      model: Coupon,
+    })
+    .populate({
       path: 'customer',
       model: Customer,
+    })
+    .populate({
+      path: 'tracking.postalService',
+      model: PostalService,
     })
     .then((order) => {
       console.log('order:', order);
@@ -128,9 +137,20 @@ router.get('/:orderId/coordinates', async (req, res) => {
   }
 });
 
-router.put('/update/:orderId', (req, res) => {
+router.put('/update/:orderId', async (req, res) => {
   const { orderId } = req.params;
-  const { shipped, paid, canceled } = req.body;
+  const { shipped, paid, canceled, trackingNumber, postalService } = req.body;
+
+  let currentPostalService;
+  if (postalService === '-') {
+    const orderObj = await Order.findOne({
+      _id: orderId,
+    });
+
+    currentPostalService = orderObj.tracking.postalService;
+  } else {
+    currentPostalService = postalService;
+  }
 
   Order.findOneAndUpdate(
     {
@@ -143,6 +163,8 @@ router.put('/update/:orderId', (req, res) => {
       canceled: canceled,
       paid: paid,
       updatedOn: Date.now(),
+      'tracking.number': trackingNumber,
+      'tracking.postalService': currentPostalService,
     },
     {
       runValidators: true,

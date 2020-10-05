@@ -14,6 +14,9 @@ const Billing = require('../../../models/billing/Billings');
 const PaymentMethod = require('../../../models/paymentMethod/PaymentMethod');
 const Cart = require('../../../models/cart/Cart');
 const PaymentReceipt = require('../../../models/paymentReceipt/PaymentReceipt');
+const Customer = require('../../../models/customer/Customer');
+const Coupon = require('../../../models/coupon/Coupon');
+const PostalService = require('../../../models/postalService/postalService');
 
 router.get('/get/orders/user/:userId', async (req, res) => {
   const { userId } = req.params;
@@ -37,7 +40,18 @@ router.get('/get/orders/user/:userId', async (req, res) => {
       path: 'paymentMethod',
       model: PaymentMethod,
     })
-
+    .populate({
+      path: 'customer',
+      model: Customer,
+    })
+    .populate({
+      path: 'coupon',
+      model: Coupon,
+    })
+    .populate({
+      path: 'tracking.postalService',
+      model: PostalService,
+    })
     .then((orders) => {
       res.status(200).send(orders);
     })

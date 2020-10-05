@@ -1,12 +1,6 @@
 const express = require('express');
 
-const app = express();
-const cors = require('cors');
-const uuidv4 = require('uuid/v4');
-
-const GstHst = require('../../../utils/taxes/gstHst');
-
-app.use(cors());
+const router = express.Router();
 
 const Customer = require('../../../models/customer/Customer');
 const CustomerProfileImage = require('../../../models/customer/CustomerProfileImage');
@@ -17,12 +11,9 @@ const PaymentMethod = require('../../../models/paymentMethod/PaymentMethod');
 const Cart = require('../../../models/cart/Cart');
 const Coupon = require('../../../models/coupon/Coupon');
 const PaymentReceipt = require('../../../models/paymentReceipt/PaymentReceipt');
+const PostalService = require('../../../models/postalService/postalService');
 
-// const authMiddleware = require('../../../middleware/auth');
-
-// app.use(authMiddleware);
-
-app.get('', async (req, res) => {
+router.get('', async (req, res) => {
   Order.find({
     completed: true,
     'deletion.isDeleted': false,
@@ -68,7 +59,7 @@ app.get('', async (req, res) => {
     });
 });
 
-app.get('/:orderId', async (req, res) => {
+router.get('/:orderId', async (req, res) => {
   const { orderId } = req.params;
   console.log('orderId:', orderId);
   Order.findOne({
@@ -107,6 +98,14 @@ app.get('/:orderId', async (req, res) => {
       path: 'coupon',
       model: Coupon,
     })
+    .populate({
+      path: 'customer',
+      model: Customer,
+    })
+    .populate({
+      path: 'tracking.postalService',
+      model: PostalService,
+    })
     .then((order) => {
       console.log('order:', order);
       res.status(200).send(order);
@@ -116,10 +115,20 @@ app.get('/:orderId', async (req, res) => {
     });
 });
 
-app.put('/update/:orderId', (req, res) => {
+router.put('/update/:orderId', async (req, res) => {
   const { orderId } = req.params;
-  const { shipped, paid, canceled } = req.body;
+  const { shipped, paid, canceled, trackingNumber, postalService } = req.body;
 
+  let currentPostalService;
+  if (postalService === '-') {
+    const orderObj = await Order.findOne({
+      _id: orderId,
+    });
+
+    currentPostalService = orderObj.tracking.postalService;
+  } else {
+    currentPostalService = postalService;
+  }
   Order.findOneAndUpdate(
     {
       _id: orderId,
@@ -131,6 +140,8 @@ app.put('/update/:orderId', (req, res) => {
       canceled: canceled,
       paid: paid,
       updatedOn: Date.now(),
+      'tracking.number': trackingNumber,
+      'tracking.postalService': currentPostalService,
     },
     {
       runValidators: true,
@@ -163,7 +174,7 @@ app.put('/update/:orderId', (req, res) => {
     });
 });
 
-app.put('/update/status/shipping', async (req, res) => {
+router.put('/update/status/shipping', async (req, res) => {
   const { orderId, newShippingStatus } = req.body;
 
   try {
@@ -199,7 +210,7 @@ app.put('/update/status/shipping', async (req, res) => {
   }
 });
 
-app.put('/update/status/paid', async (req, res) => {
+router.put('/update/status/paid', async (req, res) => {
   const { orderId, newPaymentStatus } = req.body;
 
   try {
@@ -231,4 +242,4 @@ app.put('/update/status/paid', async (req, res) => {
   }
 });
 
-module.exports = app;
+module.exports = router;

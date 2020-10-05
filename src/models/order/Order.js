@@ -76,6 +76,24 @@ const OrderSchema = new mongoose.Schema({
     required: false,
     default: null,
   },
+  tracking: {
+    number: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    postalService: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'PostalService',
+      required: false,
+      default: null,
+    },
+    when: {
+      type: Date,
+      required: false,
+      default: null,
+    },
+  },
   subtotal: {
     type: Number,
     required: true,

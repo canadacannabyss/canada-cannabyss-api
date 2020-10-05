@@ -101,6 +101,10 @@ app.use('/admin/category', require('./routes/admin/category/category'));
 app.use('/admin/categories', require('./routes/admin/categories/categories'));
 app.use('/admin/orders', require('./routes/admin/orders/orders'));
 app.use('/admin/coupons', require('./routes/admin/coupons/coupons'));
+app.use(
+  '/admin/postal-services',
+  require('./routes/admin/postalServices/postalServices')
+);
 app.use('/admin', require('./routes/admin/index'));
 
 app.use('/reseller/products', require('./routes/reseller/products/products'));
