@@ -1,4 +1,5 @@
 const express = require('express');
+const fetch = require('node-fetch');
 
 const router = express.Router();
 
@@ -239,6 +240,52 @@ router.put('/update/status/paid', async (req, res) => {
     });
   } catch (err) {
     console.log(err);
+  }
+});
+
+router.post('/send/tracking-number/start', async (req, res) => {
+  const { orderId } = req.body;
+
+  try {
+    const orderObj = await Order.findOne({
+      _id: orderId,
+    })
+      .populate({
+        path: 'customer',
+        model: Customer,
+      })
+      .populate({
+        path: 'cart',
+        model: Cart,
+      })
+      .populate({
+        path: 'tracking.postalService',
+        model: PostalService,
+      });
+
+    console.log('orderObj:', orderObj);
+
+    const fetchSendOrderTrackingNumber = await fetch(
+      `${process.env.USER_API_DOMIAN}/reseller/customers/send/tracking-number`,
+      {
+        method: 'POST',
+        mode: 'cors',
+        cache: 'no-cache',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ order: orderObj }),
+      }
+    );
+
+    const data = await fetchSendOrderTrackingNumber.json();
+
+    if (data.ok) {
+      res.status(200).send({ ok: true });
+    }
+  } catch (err) {
+    console.error(err);
   }
 });
 

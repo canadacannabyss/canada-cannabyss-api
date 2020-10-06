@@ -20,6 +20,10 @@ const PostalServiceSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  trackingWebsite: {
+    type: String,
+    required: true,
+  },
   deletion: {
     isDeleted: {
       type: Boolean,

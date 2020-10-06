@@ -74,7 +74,7 @@ router.get('/:slug', (req, res) => {
 });
 
 router.post('/create', async (req, res) => {
-  const { admin, postalServiceName } = req.body;
+  const { admin, postalServiceName, trackingWebsite } = req.body;
 
   let slug = slugifyString(postalServiceName);
 
@@ -85,6 +85,7 @@ router.post('/create', async (req, res) => {
   const newPostalService = new PostalService({
     admin,
     name: postalServiceName,
+    trackingWebsite,
     slug,
   });
 

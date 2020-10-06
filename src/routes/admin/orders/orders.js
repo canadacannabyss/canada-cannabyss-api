@@ -1,9 +1,8 @@
 const express = require('express');
 
 const router = express.Router();
-const cors = require('cors');
-const uuidv4 = require('uuid/v4');
 const NodeGeocoder = require('node-geocoder');
+const fetch = require('node-fetch');
 
 const GstHst = require('../../../utils/taxes/gstHst');
 
@@ -14,6 +13,8 @@ const Shipping = require('../../../models/shipping/Shipping');
 const Billing = require('../../../models/billing/Billings');
 const PaymentMethod = require('../../../models/paymentMethod/PaymentMethod');
 const Cart = require('../../../models/cart/Cart');
+const Product = require('../../../models/product/Product');
+const ProductMedia = require('../../../models/product/ProductMedia');
 const Coupon = require('../../../models/coupon/Coupon');
 const PaymentReceipt = require('../../../models/paymentReceipt/PaymentReceipt');
 const PostalService = require('../../../models/postalService/postalService');
@@ -262,6 +263,52 @@ router.put('/update/status/paid', async (req, res) => {
     });
   } catch (err) {
     console.log(err);
+  }
+});
+
+router.post('/send/tracking-number/start', async (req, res) => {
+  const { orderId } = req.body;
+
+  try {
+    const orderObj = await Order.findOne({
+      _id: orderId,
+    })
+      .populate({
+        path: 'customer',
+        model: Customer,
+      })
+      .populate({
+        path: 'cart',
+        model: Cart,
+      })
+      .populate({
+        path: 'tracking.postalService',
+        model: PostalService,
+      });
+
+    console.log('orderObj:', orderObj);
+
+    const fetchSendOrderTrackingNumber = await fetch(
+      `${process.env.USER_API_DOMIAN}/admin/customers/send/tracking-number`,
+      {
+        method: 'POST',
+        mode: 'cors',
+        cache: 'no-cache',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ order: orderObj }),
+      }
+    );
+
+    const data = await fetchSendOrderTrackingNumber.json();
+
+    if (data.ok) {
+      res.status(200).send({ ok: true });
+    }
+  } catch (err) {
+    console.error(err);
   }
 });
 
