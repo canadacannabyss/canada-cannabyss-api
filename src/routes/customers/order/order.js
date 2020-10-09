@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const uuidv4 = require('uuid/v4');
 const multer = require('multer');
+const fetch = require('node-fetch');
 
 const multerConfig = require('../../../config/multerPaymentReceipt');
 
@@ -26,6 +27,10 @@ const Billing = require('../../../models/billing/Billings');
 const PaymentMethod = require('../../../models/paymentMethod/PaymentMethod');
 
 const PaymentReceipt = require('../../../models/paymentReceipt/PaymentReceipt');
+
+const Customer = require('../../../models/customer/Customer');
+
+const PostalService = require('../../../models/postalService/postalService');
 
 const PstRst = require('../../../utils/taxes/pstRst');
 
@@ -791,5 +796,51 @@ router.post(
     }
   }
 );
+
+router.post('/send/finished-order/start', async (req, res) => {
+  const { orderId } = req.body;
+
+  try {
+    const orderObj = await Order.findOne({
+      _id: orderId,
+    })
+      .populate({
+        path: 'customer',
+        model: Customer,
+      })
+      .populate({
+        path: 'cart',
+        model: Cart,
+      })
+      .populate({
+        path: 'tracking.postalService',
+        model: PostalService,
+      });
+
+    console.log('orderObj:', orderObj);
+
+    const fetchSendOrderTrackingNumber = await fetch(
+      `${process.env.USER_API_DOMIAN}/customers/send/finished-order`,
+      {
+        method: 'POST',
+        mode: 'cors',
+        cache: 'no-cache',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ order: orderObj }),
+      }
+    );
+
+    const data = await fetchSendOrderTrackingNumber.json();
+
+    if (data.ok) {
+      res.status(200).send({ ok: true });
+    }
+  } catch (err) {
+    console.error(err);
+  }
+});
 
 module.exports = router;
