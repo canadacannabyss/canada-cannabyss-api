@@ -741,7 +741,51 @@ router.put('/update/completed', async (req, res) => {
 
     const order = await Order.findOne({
       _id: orderId,
+    })
+    .populate({
+      path: 'cart',
+      model: Cart,
+      populate: {
+        path: 'cart.items',
+        model: Product
+      }
     });
+
+    console.log('order found on completed:', order.cart.items)
+
+    order.cart.items.map(async (item) => {
+      const productObj = await Product.findOne({
+        _id: item._id,
+      });
+
+      await Product.findOneAndUpdate({
+        _id: item._id,
+      }, {
+        howManyBought: productObj.howManyBought + item.quantity
+      }, {
+        runValidators: true
+      });
+      return productObj
+    });
+
+
+    const promisesHowManyBought = order.cart.items.map(async (item) => {
+      const productObj = await Product.findOne({
+        _id: item._id,
+      });
+
+      await Product.findOneAndUpdate({
+        _id: item._id,
+      }, {
+        howManyBought: productObj.howManyBought + item.quantity
+      }, {
+        runValidators: true
+      });
+      return productObj
+    });
+
+    const resultsAsyncHowManyBought = await Promise.all(promisesHowManyBought);
+
 
     res.status(200).send(order.completed);
   } catch (err) {
@@ -817,7 +861,6 @@ router.post('/send/finished-order/start', async (req, res) => {
         model: PostalService,
       });
 
-    console.log('orderObj:', orderObj);
 
     const fetchSendOrderTrackingNumber = await fetch(
       `${process.env.USER_API_DOMIAN}/customers/send/finished-order`,

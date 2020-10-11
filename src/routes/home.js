@@ -1,16 +1,7 @@
 /* eslint-disable array-callback-return */
 const express = require('express');
 
-const app = express();
 const router = express.Router();
-const cors = require('cors');
-const multer = require('multer');
-// const multerConfig = require('../config/multer');
-
-// const authMiddleware = require('../middleware/auth');
-
-app.use(cors());
-// app.use(authMiddleware);
 
 const Product = require('../models/product/Product');
 const ProductComment = require('../models/product/ProductComment');
@@ -25,7 +16,7 @@ const Banner = require('../models/banner/Banner');
 const Promotion = require('../models/promotion/Promotion');
 const PromotionMedia = require('../models/promotion/PromotionMedia');
 
-app.get('/main/products', (req, res) => {
+router.get('/main/products', (req, res) => {
   let productsList = [];
   Product.find({
     'deletion.isDeleted': false,
@@ -57,7 +48,7 @@ app.get('/main/products', (req, res) => {
     });
 });
 
-app.get('/main/bundles', (req, res) => {
+router.get('/main/bundles', (req, res) => {
   let bundlesList = [];
   Bundle.find({
     'deletion.isDeleted': false,
@@ -99,7 +90,7 @@ app.get('/main/bundles', (req, res) => {
     });
 });
 
-app.get('/main/banners', async (req, res) => {
+router.get('/main/banners', async (req, res) => {
   Banner.find({
     featured: true,
     'deletion.isDeleted': false,
@@ -120,7 +111,36 @@ app.get('/main/banners', async (req, res) => {
     });
 });
 
-app.get('/main/category', (req, res) => {
+router.get('/main/most-bought', (req, res) => {
+  Product.find()
+  .populate({
+    path: 'media',
+    model: ProductMedia,
+  })
+  .sort([['howManyBought', -1]])
+  .then((products) => {
+    const productsList = products.map((product) => {
+      return {
+        id: product._id,
+        productName: product.productName,
+        slug: product.slug,
+        prices: {
+          price: product.prices.price,
+          compareTo: product.prices.compareTo,
+        },
+        media: {
+          url: product.media[0].url,
+        },
+      };
+    });
+    console.log('produicts:', products)
+    res.status(200).send(productsList)
+  }).catch((err) => {
+    console.error(err);
+  })
+})
+
+router.get('/main/category', (req, res) => {
   Category.find({
     featured: true,
     'deletion.isDeleted': false,
@@ -141,7 +161,7 @@ app.get('/main/category', (req, res) => {
     });
 });
 
-app.get('/main/newest/products', (req, res) => {
+router.get('/main/newest/products', (req, res) => {
   let productsList = [];
   Product.find({
     'deletion.isDeleted': false,
@@ -176,11 +196,12 @@ app.get('/main/newest/products', (req, res) => {
     });
 });
 
-app.get('/get/product/:slug', (req, res) => {
+router.get('/get/product/:slug', (req, res) => {
   const { slug } = req.params;
   console.log('slug product:', slug);
   Product.findOne({
     slug,
+    'deletion.isDeleted': false,
   })
     .populate({
       path: 'media',
@@ -194,7 +215,7 @@ app.get('/get/product/:slug', (req, res) => {
     });
 });
 
-app.get('/get/comments/:productId', async (req, res) => {
+router.get('/get/comments/:productId', async (req, res) => {
   const { productId } = req.params;
 
   let commentsList = [];
@@ -239,4 +260,4 @@ app.get('/get/comments/:productId', async (req, res) => {
     });
 });
 
-module.exports = app;
+module.exports = router;

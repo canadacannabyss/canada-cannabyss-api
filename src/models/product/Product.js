@@ -32,6 +32,11 @@ const ProductSchema = new mongoose.Schema({
     required: true,
     default: 0,
   },
+  howManyBought: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
   prices: {
     price: {
       type: Number,
