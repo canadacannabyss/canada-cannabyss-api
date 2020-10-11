@@ -118,6 +118,7 @@ router.get('/main/most-bought', (req, res) => {
     model: ProductMedia,
   })
   .sort([['howManyBought', -1]])
+  .limit(8)
   .then((products) => {
     const productsList = products.map((product) => {
       return {
