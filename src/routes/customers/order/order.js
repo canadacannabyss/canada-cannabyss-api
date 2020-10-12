@@ -80,6 +80,7 @@ router.get('/get/order/:orderId', async (req, res) => {
   const { orderId } = req.params;
   Order.findOne({
     _id: orderId,
+    completed: false,
   })
     .populate({
       path: 'paymentMethod',
@@ -92,6 +93,22 @@ router.get('/get/order/:orderId', async (req, res) => {
     .populate({
       path: 'shippingAddress',
       model: Shipping,
+    })
+    .populate({
+      path: 'cart',
+      model: Cart,
+      populate: {
+        path: 'items',
+        model: Product,
+      },
+    })
+    .populate({
+      path: 'cart',
+      model: Cart,
+      populate: {
+        path: 'items',
+        model: Bundle,
+      },
     })
     .populate({
       path: 'coupon',
@@ -127,6 +144,22 @@ router.get('/get/order/user/:userId', async (req, res) => {
     .populate({
       path: 'shippingAddress',
       model: Shipping,
+    })
+    .populate({
+      path: 'cart',
+      model: Cart,
+      populate: {
+        path: 'items',
+        model: Product,
+      },
+    })
+    .populate({
+      path: 'cart',
+      model: Cart,
+      populate: {
+        path: 'items',
+        model: Bundle,
+      },
     })
     .populate({
       path: 'coupon',
