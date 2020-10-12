@@ -299,6 +299,9 @@ app.get('/get/products/category/:category', async (req, res) => {
     slug: category,
   });
 
+  console.log('category:', category);
+  console.log('categoryObj:', categoryObj);
+
   const page = parseInt(req.query.page);
   const limit = parseInt(req.query.limit);
 
@@ -307,10 +310,14 @@ app.get('/get/products/category/:category', async (req, res) => {
 
   const results = {};
 
+  // const productTestObj = await Product.find({
+  //   'organization.categories'
+  // })
+
   console.log(
     'await Product.countDocuments().exec():',
     await Product.find({
-      'organization.category': categoryObj,
+      'organization.categories': categoryObj,
     })
       .countDocuments()
       .exec()
@@ -319,7 +326,7 @@ app.get('/get/products/category/:category', async (req, res) => {
   if (
     endIndex <
     (await Product.find({
-      'organization.category': categoryObj,
+      'organization.categories': categoryObj._id,
     })
       .countDocuments()
       .exec())
@@ -339,7 +346,7 @@ app.get('/get/products/category/:category', async (req, res) => {
 
   try {
     results.results = await Product.find({
-      'organization.category': categoryObj,
+      'organization.categories': categoryObj,
     })
       .limit(limit)
       .skip(startIndex)
