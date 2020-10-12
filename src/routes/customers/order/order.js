@@ -896,7 +896,7 @@ router.post('/send/finished-order/start', async (req, res) => {
 
 
     const fetchSendOrderTrackingNumber = await fetch(
-      `${process.env.USER_API_DOMIAN}/customers/send/finished-order`,
+      `${process.env.USER_API_DOMAIN}/customers/send/finished-order`,
       {
         method: 'POST',
         mode: 'cors',
