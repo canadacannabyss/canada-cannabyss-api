@@ -204,39 +204,22 @@ router.put('/update/subtotal', async (req, res) => {
       .populate({
         path: 'coupon',
         model: Coupon,
+      })
+      .populate({
+        path: 'paymentMethod',
+        model: PaymentMethod,
       });
 
     let couponValid = false;
     let subtotalVar = subtotal;
 
     if (order.coupon) {
-      // order.cart.items.map((item) => {
-      //   order.coupon.items.map((couponItem) => {
-      //     console.log(
-      //       'item._id !== couponItem._id:',
-      //       item._id === couponItem._id
-      //     );
-      //     if (item._id === couponItem._id) {
-      //       couponValid = true;
-      //       return;
-      //     }
-      //   });
-      // });
-
-      // if (couponValid) {
-      //   if (order.coupon.discount.type === 'percent') {
-      //     subtotalVar = subtotal - subtotal / order.coupon.discount.amount;
-      //   }
-      //   if (order.coupon.discount.type === 'cash') {
-      //     subtotalVar = subtotal - order.coupon.discount.amount;
-      //   }
-      // }
-
       if (order.coupon.discount.type === 'percent') {
         console.log(
           'order.coupon.discount.amount:',
           order.coupon.discount.amount
         );
+        // Calculate discount based on the coupon discount percentage amount
         subtotalVar =
           subtotal - subtotal * (order.coupon.discount.amount / 100);
       }
@@ -245,8 +228,22 @@ router.put('/update/subtotal', async (req, res) => {
       }
     }
 
+    if (order.paymentMethod !== null) {
+      if (order.paymentMethod.cryptocurrency !== null) {
+        if (
+          order.paymentMethod.cryptocurrency.discount.type === 'percentage' &&
+          !isNaN(order.paymentMethod.cryptocurrency.discount.amount)
+        ) {
+          if (order.paymentMethod.cryptocurrency.discount.amount > 0) {
+            // Calculate discount based on the cryptocurrency payment method discount percentage amount
+            subtotalVar = subtotalVar - subtotalVar * (order.paymentMethod.cryptocurrency.discount.amount / 100);
+          }
+        } 
+      }
+    }
+
     subtotalVar = Math.round((subtotalVar + Number.EPSILON) * 100) / 100;
-    console.log('subtotalVar:', subtotalVar);
+    console.log('subtotalVar:', parseFloat(subtotalVar.toFixed(2)));
 
     await Order.updateOne(
       {

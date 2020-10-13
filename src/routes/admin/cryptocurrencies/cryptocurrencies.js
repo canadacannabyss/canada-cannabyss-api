@@ -188,18 +188,37 @@ router.get('/:symbol', (req, res) => {
 });
 
 router.post('/create', (req, res) => {
-  const { logo, symbol, name, address, admin } = req.body;
+  const { logo, symbol, name, address, admin, discount } = req.body;
 
-  const newAcceptedPaymentMethod = new AcceptedPaymentMethod({
-    admin,
-    type: 'cryptocurrency',
-    cryptocurrency: {
-      logo,
-      symbol,
-      name,
-      address,
-    },
-  });
+  console.log('req.body:', req.body)
+
+  let newAcceptedPaymentMethod;
+
+  if (discount !== null || discount !== undefined) {
+    newAcceptedPaymentMethod = new AcceptedPaymentMethod({
+      admin,
+      type: 'cryptocurrency',
+      cryptocurrency: {
+        logo,
+        symbol,
+        name,
+        address,
+        discount,
+      },
+    });
+  } else {
+    newAcceptedPaymentMethod = new AcceptedPaymentMethod({
+      admin,
+      type: 'cryptocurrency',
+      cryptocurrency: {
+        logo,
+        symbol,
+        name,
+        address,
+      },
+    });
+  }
+
 
   newAcceptedPaymentMethod
     .save()

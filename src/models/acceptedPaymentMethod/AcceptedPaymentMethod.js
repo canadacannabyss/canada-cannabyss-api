@@ -37,6 +37,18 @@ const AcceptedPaymentMethodSchema = new mongoose.Schema({
       required: false,
       default: null,
     },
+    discount: {
+      type: {
+        type: String,
+        required: false,
+        default: null,
+      },
+      amount: {
+        type: Number,
+        required: false,
+        default: null,
+      }
+    }
   },
   eTransfer: {
     recipient: {

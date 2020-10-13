@@ -90,6 +90,10 @@ app.post('/cryptocurrency/create', async (req, res) => {
       name: cryptocurrency.name,
       customerAddress: cryptocurrency.customerAddress,
       companyAddress: cryptocurrency.companyAddress,
+      discount: {
+        type: cryptocurrency.discount.type,
+        amount: cryptocurrency.discount.amount,
+      },
     },
   });
 
@@ -117,6 +121,7 @@ app.get('/cryptocurrency/get/by/user/:userId', async (req, res) => {
       customerAddress,
       companyAddress,
     },
+    'deletion.isDeleted': false,
   })
     .then((paymentMethod) => {
       let paymentMethodObj = {};
