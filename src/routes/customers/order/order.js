@@ -256,6 +256,7 @@ router.put('/update/subtotal', async (req, res) => {
         runValidators: true,
       }
     );
+    
     Order.findOne({
       _id: orderId,
     })
