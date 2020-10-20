@@ -133,6 +133,8 @@ app.use(
   require('./routes/cryptocurrencies/cryptocurrencies')
 );
 
+app.use('/invoices', require('./routes/invoices/invoices'));
+
 const port = process.env.PORT || global.gConfig.node_port;
 
 app.listen(port, () => {
