@@ -1,42 +1,12 @@
 const express = require('express');
+const router = express.Router();
 
-const app = express();
-const cors = require('cors');
+const AddressController = require('../../controllers/addresses/addresses')
 
-app.use(cors());
+router.get('/get/all/provinces', AddressController.getAllProvinces);
 
-const Canada = require('../../utils/addresses/canada');
+router.get('/get/all/cities', AddressController.getAllCities);
 
-// const authMiddleware = require('../../../middleware/auth');
+router.get('/get/all/cities/from/:province', AddressController.getAllCitiesFromProvince);
 
-// app.use(authMiddleware);
-
-app.get('/get/all/provinces', async (req, res) => {
-  const canada = new Canada();
-
-  res.json(canada.getAllProvinces());
-});
-
-app.get('/get/all/cities', async (req, res) => {
-  const canada = new Canada();
-
-  res.json(canada.getAllCities());
-});
-
-app.get('/get/all/cities/from/:province', async (req, res) => {
-  const { province } = req.params;
-  const canada = new Canada();
-
-  let array = canada.getAllCities(),
-    result = array
-      .filter((item) => {
-        return item[1] === province;
-      })
-      .map((a) => {
-        return a[0];
-      });
-
-  res.json(result);
-});
-
-module.exports = app;
+module.exports = router;
