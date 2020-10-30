@@ -1,142 +1,16 @@
 const express = require('express');
+const router = express.Router();
 
-const app = express();
-const cors = require('cors');
-const uuidv4 = require('uuid/v4');
+const CustomerBillingController = require('../../../controllers/customers/billing/biling')
 
-app.use(cors());
+router.post('/create', CustomerBillingController.create);
 
-const Billing = require('../../../models/billing/Billings');
+router.get('/get/billing/:billingId', CustomerBillingController.getById);
 
-// const authMiddleware = require('../../../middleware/auth');
+router.get('/get/all/:userId', CustomerBillingController.getAllByUser);
 
-// app.use(authMiddleware);
+router.put('/edit/:billingId', CustomerBillingController.edit);
 
-app.post('/create', async (req, res) => {
-  const {
-    user,
-    name,
-    country,
-    provinceState,
-    city,
-    addressLine1,
-    addressLine2,
-    postalCode,
-  } = req.body;
-  const newBilling = new Billing({
-    customer: user,
-    name,
-    country,
-    provinceState,
-    city,
-    addressLine1,
-    addressLine2,
-    postalCode,
-  });
+router.put('/delete/:billingId', CustomerBillingController.delete);
 
-  newBilling
-    .save()
-    .then((billing) => {
-      res.json(billing);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-});
-
-app.get('/get/billing/:billingId', async (req, res) => {
-  const { billingId } = req.params;
-
-  Billing.findOne({
-    _id: billingId,
-    deleted: false,
-  })
-    .then((billing) => {
-      res.json(billing);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-});
-
-app.get('/get/all/:userId', async (req, res) => {
-  const { userId } = req.params;
-
-  Billing.find({
-    customer: userId,
-    'deletion.isDeleted': false,
-  })
-    .then((billing) => {
-      res.json(billing);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-});
-
-app.put('/edit/:billingId', async (req, res) => {
-  const {
-    id,
-    name,
-    country,
-    provinceState,
-    city,
-    addressLine1,
-    addressLine2,
-    postalCode,
-  } = req.body;
-
-  Billing.findOneAndUpdate(
-    {
-      _id: id,
-    },
-    {
-      name: {
-        first: name.first,
-        last: name.last,
-      },
-      country: country,
-      provinceState: provinceState,
-      city: city,
-      addressLine1: addressLine1,
-      addressLine2: addressLine2,
-      postalCode: postalCode,
-      updatedOn: Date.now(),
-    },
-    {
-      runValidators: true,
-    }
-  )
-    .then((billing) => {
-      console.log('billing:', billing);
-      res.status(200).send({ ok: true });
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-});
-
-app.put('/delete/:billingId', async (req, res) => {
-  const { billingId } = req.params;
-
-  try {
-    Billing.findOneAndUpdate(
-      {
-        _id: billingId,
-      },
-      {
-        'deletion.isDeleted': true,
-        'deletion.when': Date.now(),
-      },
-      {
-        runValidators: true,
-      }
-    ).then(() => {
-      res.status(200).send({ ok: true });
-    });
-  } catch (err) {
-    console.error(err);
-  }
-});
-
-module.exports = app;
+module.exports = router;

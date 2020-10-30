@@ -2,8 +2,8 @@
 const express = require('express');
 const router = express.Router();
 
-const Coupon = require('../../../models/coupon/Coupon');
+const CustomerCouponsController = require('../../../controllers/customers/coupons/coupons')
 
-app.get('/get/', (req, res) => {});
+app.get('/get/', CustomerCouponsController.get);
 
 module.exports = router;

@@ -1,144 +1,16 @@
 const express = require('express');
+const router = express.Router();
 
-const app = express();
-const cors = require('cors');
-const uuidv4 = require('uuid/v4');
+const CustomerShippingController = require('../../../controllers/customers/shipping/shipping')
 
-app.use(cors());
+router.post('/create', CustomerShippingController.create);
 
-const Shipping = require('../../../models/shipping/Shipping');
+router.get('/get/shipping/:shippingId', CustomerShippingController.getById);
 
-// const authMiddleware = require('../../../middleware/auth');
+router.get('/get/all/:userId', CustomerShippingController.getAllByUser);
 
-// app.use(authMiddleware);
+router.put('/edit/:shippingId', CustomerShippingController.edit);
 
-app.post('/create', async (req, res) => {
-  const {
-    user,
-    name,
-    country,
-    provinceState,
-    city,
-    addressLine1,
-    addressLine2,
-    postalCode,
-  } = req.body;
+router.put('/delete/:shippingId', CustomerShippingController.delete);
 
-  const newShipping = new Shipping({
-    customer: user,
-    name,
-    country,
-    provinceState,
-    city,
-    addressLine1,
-    addressLine2,
-    postalCode,
-  });
-
-  newShipping
-    .save()
-    .then((shipping) => {
-      res.json(shipping);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-});
-
-app.get('/get/shipping/:shippingId', async (req, res) => {
-  const { shippingId, userId } = req.params;
-
-  Shipping.findOne({
-    _id: shippingId,
-    customer: userId,
-    deleted: false,
-  })
-    .then((shipping) => {
-      res.json(shipping);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-});
-
-app.get('/get/all/:userId', async (req, res) => {
-  const { userId } = req.params;
-
-  Shipping.find({
-    customer: userId,
-    'deletion.isDeleted': false,
-  })
-    .then((shipping) => {
-      res.json(shipping);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-});
-
-app.put('/edit/:shippingId', async (req, res) => {
-  const {
-    id,
-    name,
-    country,
-    provinceState,
-    city,
-    addressLine1,
-    addressLine2,
-    postalCode,
-  } = req.body;
-
-  Shipping.findOneAndUpdate(
-    {
-      _id: id,
-    },
-    {
-      name: {
-        first: name.first,
-        last: name.last,
-      },
-      country: country,
-      provinceState: provinceState,
-      city: city,
-      addressLine1: addressLine1,
-      addressLine2: addressLine2,
-      postalCode: postalCode,
-      updatedOn: Date.now(),
-    },
-    {
-      runValidators: true,
-    }
-  )
-    .then((billing) => {
-      console.log('billing:', billing);
-      res.status(200).send({ ok: true });
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-});
-
-app.put('/delete/:shippingId', async (req, res) => {
-  const { shippingId } = req.params;
-
-  try {
-    Shipping.findOneAndUpdate(
-      {
-        _id: shippingId,
-      },
-      {
-        'deletion.isDeleted': true,
-        'deletion.when': Date.now(),
-      },
-      {
-        runValidators: true,
-      }
-    ).then(() => {
-      res.status(200).send({ ok: true });
-    });
-  } catch (err) {
-    console.error(err);
-  }
-});
-
-module.exports = app;
+module.exports = router;
