@@ -730,6 +730,24 @@ module.exports = {
     }
   },
 
+  setGlobalVariable: (req, res) => {
+    try {
+      console.log(req.body)
+      const { type, title } = req.body;
+
+      global.gConfigMulter.type = type;
+      global.gConfigMulter.title = title;
+      global.gConfigMulter.folder_name = global.gConfigMulter.title;
+      global.gConfigMulter.destination = `${global.gConfigMulter.type}/${global.gConfigMulter.folder_name}`;
+
+      return res.status(200).send({
+        ok: true,
+      });
+    } catch (err) {
+      console.error(err)
+    }
+  },
+
   updateCompleted: async (req, res) => {
     const { orderId, imageObj, totalInFiat } = req.body;
 

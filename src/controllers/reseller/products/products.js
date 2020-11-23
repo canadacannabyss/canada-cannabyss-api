@@ -331,6 +331,7 @@ module.exports = {
       console.log(err);
     }
   },
+
   getBySlug: (req, res) => {
     const { slug } = req.params;
 

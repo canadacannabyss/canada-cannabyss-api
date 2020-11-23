@@ -36,6 +36,8 @@ router.put('/update/billing', CustomerOrderController.updateBilling);
 
 router.put('/update/payment-method', CustomerOrderController.updatePaymentMethod);
 
+router.post('/set/global-variable', CustomerOrderController.setGlobalVariable)
+
 router.put('/update/completed', CustomerOrderController.updateCompleted);
 
 router.post(
