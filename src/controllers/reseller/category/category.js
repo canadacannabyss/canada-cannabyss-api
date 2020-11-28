@@ -1,18 +1,18 @@
-const uuidv4 = require('uuid/v4');
-const slugify = require('slugify');
-const _ = require('lodash');
+const uuidv4 = require("uuid/v4");
+const slugify = require("slugify");
+const _ = require("lodash");
 
 const {
   slugifyString,
   generateRandomSlug,
-} = require('../../../utils/strings/slug');
+} = require("../../../utils/strings/slug");
 
-const Category = require('../../../models/category/Category');
-const CategoryMedia = require('../../../models/category/CategoryMedia');
-const Product = require('../../../models/product/Product');
-const Bundle = require('../../../models/bundle/Bundle');
-const Promotion = require('../../../models/promotion/Promotion');
-const Banner = require('../../../models/banner/Banner');
+const Category = require("../../../models/category/Category");
+const CategoryMedia = require("../../../models/category/CategoryMedia");
+const Product = require("../../../models/product/Product");
+const Bundle = require("../../../models/bundle/Bundle");
+const Promotion = require("../../../models/promotion/Promotion");
+const Banner = require("../../../models/banner/Banner");
 
 const verifyValidSlug = async (slug) => {
   try {
@@ -47,10 +47,10 @@ module.exports = {
     const { slug } = req.params;
     Category.findOne({
       slug,
-      'deletion.isDeleted': false,
+      "deletion.isDeleted": false,
     })
       .populate({
-        path: 'media',
+        path: "media",
         model: CategoryMedia,
       })
       .then((category) => {
@@ -85,10 +85,10 @@ module.exports = {
             category: category._id,
           },
         });
-        console.log('productObj:', productObj);
-        console.log('bundleObj:', bundleObj);
-        console.log('promotionObj:', promotionObj);
-        console.log('bannerObj:', bannerObj);
+        console.log("productObj:", productObj);
+        console.log("bundleObj:", bundleObj);
+        console.log("promotionObj:", promotionObj);
+        console.log("bannerObj:", bannerObj);
         if (
           productObj.length === 0 &&
           bundleObj.length === 0 &&
@@ -99,10 +99,10 @@ module.exports = {
         }
       });
       const newCategories = await Category.find().populate({
-        path: 'media',
+        path: "media",
         model: CategoryMedia,
       });
-      console.log('newCategories:', newCategories);
+      console.log("newCategories:", newCategories);
       return res.status(200).send(newCategories);
     } catch (err) {
       console.log(err);
@@ -131,43 +131,43 @@ module.exports = {
     let errors = [];
     if (
       _.isEmpty(media) ||
-      !typeof isSlugValid === 'boolean' ||
+      !typeof isSlugValid === "boolean" ||
       !categoryName ||
-      !typeof featured === 'boolean' ||
+      !typeof featured === "boolean" ||
       !description ||
       !seo.title ||
       !seo.slug ||
       !seo.description
     ) {
-      if (!typeof isSlugValid === 'boolean') {
+      if (!typeof isSlugValid === "boolean") {
         errors.push({
           value: isSlugValid,
-          errMsg: 'isSluValid should be boolean',
+          errMsg: "isSluValid should be boolean",
         });
       } else if (!categoryName) {
         errors.push({
           value: categoryName,
-          errMsg: 'categoryName must have at least 1 character',
+          errMsg: "categoryName must have at least 1 character",
         });
       } else if (!description) {
         errors.push({
           value: description,
-          errMsg: 'description must have at least 1 character',
+          errMsg: "description must have at least 1 character",
         });
       } else if (!seo.title) {
         errors.push({
           value: seo.title,
-          errMsg: 'seo.title must have at least 1 character',
+          errMsg: "seo.title must have at least 1 character",
         });
       } else if (!seo.slug) {
         errors.push({
           value: seo.slug,
-          errMsg: 'seo.slug must have at least 1 character',
+          errMsg: "seo.slug must have at least 1 character",
         });
       } else if (!seo.description) {
         errors.push({
           value: seo.description,
-          errMsg: 'seo.description must have at least 1 character',
+          errMsg: "seo.description must have at least 1 character",
         });
       }
     }
@@ -201,7 +201,7 @@ module.exports = {
             console.log(err);
           });
       } else {
-        return res.json({ error: 'The provided slug is invalid' });
+        return res.json({ error: "The provided slug is invalid" });
       }
     }
   },
@@ -232,7 +232,7 @@ module.exports = {
       } else {
         newMedia = media;
         if (categoryObj.slug !== slug) {
-          console.log('categoryObj.media:', categoryObj.media);
+          console.log("categoryObj.media:", categoryObj.media);
           if (categoryObj.media) {
             const categoryMediaObj = await CategoryMedia.findOne({
               _id: categoryObj.media,
@@ -277,9 +277,9 @@ module.exports = {
   },
 
   upload: async (req, res) => {
-    const { originalname: name, size, key, location: url = '' } = req.file;
+    const { originalname: name, size, key, location: url = "" } = req.file;
     const id = uuidv4();
-    console.log('id:', id);
+    console.log("id:", id);
 
     const cover = await CategoryMedia.create({
       id,
@@ -321,11 +321,11 @@ module.exports = {
     const coverFile = await CategoryMedia.findOne({
       _id: id,
     });
-    console.log('id:', id);
-    console.log('coverFile:', coverFile);
+    console.log("id:", id);
+    console.log("coverFile:", coverFile);
     await coverFile.remove();
     return res.send({
-      msg: 'Blog Category cover file successfully deleted',
+      msg: "Blog Category cover file successfully deleted",
     });
   },
 
@@ -340,8 +340,8 @@ module.exports = {
           _id: category.media,
         },
         {
-          'deletion.isDeleted': true,
-          'deletion.when': Date.now(),
+          "deletion.isDeleted": true,
+          "deletion.when": Date.now(),
         },
         {
           runValidators: true,
@@ -351,8 +351,8 @@ module.exports = {
       category
         .updateOne(
           {
-            'deletion.isDeleted': true,
-            'deletion.when': Date.now(),
+            "deletion.isDeleted": true,
+            "deletion.when": Date.now(),
           },
           {
             runValidators: true,
@@ -375,8 +375,8 @@ module.exports = {
         _id: id,
       },
       {
-        'deletion.isDeleted': true,
-        'deletion.when': Date.now(),
+        "deletion.isDeleted": true,
+        "deletion.when": Date.now(),
       },
       {
         runValidators: true,
@@ -388,5 +388,5 @@ module.exports = {
       .catch((err) => {
         console.error(err);
       });
-  }
-}
+  },
+};
