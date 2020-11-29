@@ -1,35 +1,35 @@
-const express = require('express');
-const router = express.Router();
+const express = require('express')
+const router = express.Router()
 
-const multer = require('multer');
-const multerConfig = require('../../../config/multer');
+const multer = require('multer')
+const multerConfig = require('../../../config/multer/multer')
 
 const AdminProductController = require('../../../controllers/admin/products/products')
 
-router.get('', AdminProductController.index);
+router.get('', AdminProductController.index)
 
-router.get('/bundle/products', AdminProductController.getBundleProducts);
+router.get('/bundle/products', AdminProductController.getBundleProducts)
 
-router.get('/panel/get/:slug', AdminProductController.panelGetProductBySlug);
+router.get('/panel/get/:slug', AdminProductController.panelGetProductBySlug)
 
-router.get('/validation/slug/:slug', AdminProductController.validateSlug);
+router.get('/validation/slug/:slug', AdminProductController.validateSlug)
 
-router.post('/publish', AdminProductController.publish);
+router.post('/publish', AdminProductController.publish)
 
 router.post(
   '/publish/media',
   multer(multerConfig).single('file'),
-  AdminProductController.uploadMedia
-);
+  AdminProductController.uploadMedia,
+)
 
-router.post('/set/global-variable', AdminProductController.setGlobalVariable);
+router.post('/set/global-variable', AdminProductController.setGlobalVariable)
 
-router.put('/update/:id', AdminProductController.updateProduct);
+router.put('/update/:id', AdminProductController.updateProduct)
 
-router.get('/:slug', AdminProductController.getProductBySlug);
+router.get('/:slug', AdminProductController.getProductBySlug)
 
-router.put('/delete/product/:productId', AdminProductController.deleteProduct);
+router.put('/delete/product/:productId', AdminProductController.deleteProduct)
 
-router.put('/delete/cover/:id', AdminProductController.deleteMedia);
+router.put('/delete/cover/:id', AdminProductController.deleteMedia)
 
-module.exports = router;
+module.exports = router

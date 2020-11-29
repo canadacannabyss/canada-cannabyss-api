@@ -1,40 +1,40 @@
-const Product = require('../../../models/product/Product');
-const ProductComment = require('../../../models/product/ProductComment');
-const ProductCommentReply = require('../../../models/product/ProductCommentReply');
-const ProductMedia = require('../../../models/product/ProductMedia');
+const Product = require('../../../models/product/Product')
+const ProductComment = require('../../../models/product/ProductComment')
+const ProductCommentReply = require('../../../models/product/ProductCommentReply')
+const ProductMedia = require('../../../models/product/ProductMedia')
 
-const Bundle = require('../../../models/bundle/Bundle');
-const BundleComment = require('../../../models/bundle/BundleComment');
-const BundleCommentReply = require('../../../models/bundle/BundleCommentReply');
+const Bundle = require('../../../models/bundle/Bundle')
+const BundleComment = require('../../../models/bundle/BundleComment')
+const BundleCommentReply = require('../../../models/bundle/BundleCommentReply')
 
-const Customer = require('../../../models/customer/Customer');
-const CustomerProfileImage = require('../../../models/customer/CustomerProfileImage');
+const Customer = require('../../../models/customer/Customer')
+const CustomerProfileImage = require('../../../models/customer/CustomerProfileImage')
 
 module.exports = {
   postCommentProduct: async (req, res) => {
-    const { productId, userId, content, stars } = req.body;
+    const { productId, userId, content, stars } = req.body
 
-    console.log('productId:', productId);
-    console.log('userId:', userId);
-    console.log('content:', content);
+    console.log('productId:', productId)
+    console.log('userId:', userId)
+    console.log('content:', content)
 
-    const errors = [];
+    const errors = []
     if (!productId || !userId || !content) {
       errors.push({
         errorMsg: 'Please enter all fields.',
-      });
+      })
     }
 
     if (errors.length > 0) {
       return res.json({
         error: errors,
-      });
+      })
     } else {
-      const id = uuidv4();
-      const createdOn = Date.now();
-      const updatedOn = null;
-      let commentObj;
-      let commentId;
+      const id = uuidv4()
+      const createdOn = Date.now()
+      const updatedOn = null
+      let commentObj
+      let commentId
       const newComment = new ProductComment({
         id,
         customer: userId,
@@ -46,19 +46,19 @@ module.exports = {
         likes: 0,
         dislikes: 0,
         replies: [],
-      });
+      })
       await newComment
         .save()
         .then((comment) => {
-          commentObj = comment;
-          commentId = comment._id;
+          commentObj = comment
+          commentId = comment._id
         })
         .catch((err) => {
-          console.log('err:', err);
+          console.log('err:', err)
           return res.json({
             err,
-          });
-        });
+          })
+        })
 
       try {
         const commentsArray = await ProductComment.find({
@@ -78,44 +78,44 @@ module.exports = {
           })
           .sort({
             createdOn: '-1',
-          });
+          })
 
-        console.log('commentsArray:', commentsArray);
+        console.log('commentsArray:', commentsArray)
 
-        return res.json(commentsArray);
+        return res.json(commentsArray)
       } catch (err) {
-        console.log('err:', err);
+        console.log('err:', err)
         return res.json({
           err,
-        });
+        })
       }
     }
   },
 
   postCommentBundle: async (req, res) => {
-    const { bundleId, userId, content, stars } = req.body;
+    const { bundleId, userId, content, stars } = req.body
 
-    console.log('bundleId:', bundleId);
-    console.log('userId:', userId);
-    console.log('content:', content);
+    console.log('bundleId:', bundleId)
+    console.log('userId:', userId)
+    console.log('content:', content)
 
-    const errors = [];
+    const errors = []
     if (!bundleId || !userId || !content) {
       errors.push({
         errorMsg: 'Please enter all fields.',
-      });
+      })
     }
 
     if (errors.length > 0) {
       return res.json({
         error: errors,
-      });
+      })
     } else {
-      const id = uuidv4();
-      const createdOn = Date.now();
-      const updatedOn = null;
-      let commentObj;
-      let commentId;
+      const id = uuidv4()
+      const createdOn = Date.now()
+      const updatedOn = null
+      let commentObj
+      let commentId
       const newComment = new BundleComment({
         id,
         customer: userId,
@@ -127,19 +127,19 @@ module.exports = {
         likes: 0,
         dislikes: 0,
         replies: [],
-      });
+      })
       await newComment
         .save()
         .then((comment) => {
-          commentObj = comment;
-          commentId = comment._id;
+          commentObj = comment
+          commentId = comment._id
         })
         .catch((err) => {
-          console.log('err:', err);
+          console.log('err:', err)
           return res.json({
             err,
-          });
-        });
+          })
+        })
 
       try {
         const commentsArray = await BundleComment.find({
@@ -159,41 +159,41 @@ module.exports = {
           })
           .sort({
             createdOn: '-1',
-          });
+          })
 
-        console.log('commentsArray:', commentsArray);
+        console.log('commentsArray:', commentsArray)
 
-        return res.json(commentsArray);
+        return res.json(commentsArray)
       } catch (err) {
-        console.log('err:', err);
+        console.log('err:', err)
         return res.json({
           err,
-        });
+        })
       }
     }
   },
 
   replyComment: async (req, res) => {
-    const { productId, commentId, userId, content } = req.body;
+    const { productId, commentId, userId, content } = req.body
 
-    console.log('commentId:', commentId);
+    console.log('commentId:', commentId)
 
-    const errors = [];
+    const errors = []
     if (!productId || !userId || !content || !commentId) {
       errors.push({
         errorMsg: 'Please enter all fields.',
-      });
+      })
     }
 
     if (errors.length > 0) {
       return res.json({
         error: errors,
-      });
+      })
     } else {
-      const id = uuidv4();
-      const createdOn = Date.now();
-      const updatedOn = null;
-      let commentIdVar;
+      const id = uuidv4()
+      const createdOn = Date.now()
+      const updatedOn = null
+      let commentIdVar
       const newCommentReply = new CommentReply({
         id,
         customer: userId,
@@ -204,30 +204,30 @@ module.exports = {
         updatedOn,
         likes: 0,
         dislikes: 0,
-      });
+      })
       await newCommentReply
         .save()
         .then((comment) => {
-          commentIdVar = comment._id;
+          commentIdVar = comment._id
         })
         .catch((err) => {
-          console.log('err:', err);
+          console.log('err:', err)
           return res.json({
             err,
-          });
-        });
+          })
+        })
 
       try {
         const PostObj = await Product.findOne({
           _id: postId,
-        });
+        })
         const CommentObj = await Comment.findOne({
           _id: commentId,
-        });
-        let commentObjReplies = await CommentObj.replies;
-        console.log('commentObjReplies:', commentObjReplies);
-        commentObjReplies.push(commentIdVar);
-        console.log('commentObjReplies:', commentObjReplies);
+        })
+        let commentObjReplies = await CommentObj.replies
+        console.log('commentObjReplies:', commentObjReplies)
+        commentObjReplies.push(commentIdVar)
+        console.log('commentObjReplies:', commentObjReplies)
         await Comment.updateOne(
           {
             _id: postId,
@@ -237,62 +237,61 @@ module.exports = {
           },
           {
             runValidation: true,
-          }
-        );
-        return res.status(200).send({ ok: true });
+          },
+        )
+        return res.status(200).send({ ok: true })
       } catch (err) {
-        console.log('err:', err);
+        console.log('err:', err)
         return res.json({
           err,
-        });
+        })
       }
     }
   },
 
   verifyExistPost: async (req, res) => {
-    const { productId } = req.params;
+    const { productId } = req.params
 
-    const errors = [];
+    const errors = []
     if (!productId) {
       errors.push({
         errorMsg: 'Please enter all fields.',
-      });
+      })
     }
 
     Product.findOne({
       _id: productId,
     })
       .then((post) => {
-        return res.status(200).json(post);
+        return res.status(200).json(post)
       })
       .catch((err) => {
         return res.json({
           err,
-        });
-      });
+        })
+      })
   },
 
-
   verufyExistComment: async (req, res) => {
-    const { commentId } = req.params;
+    const { commentId } = req.params
 
-    const errors = [];
+    const errors = []
     if (!commentId) {
       errors.push({
         errorMsg: 'Please enter all fields.',
-      });
+      })
     }
 
     Comment.findOne({
       _id: commentId,
     })
       .then((post) => {
-        return res.status(200).json(post);
+        return res.status(200).json(post)
       })
       .catch((err) => {
         return res.json({
           err,
-        });
-      });
-  }
+        })
+      })
+  },
 }

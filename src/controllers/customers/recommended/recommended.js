@@ -1,11 +1,11 @@
-const Product = require('../../../models/product/Product');
-const ProductComment = require('../../../models/product/ProductComment');
-const ProductCommentReply = require('../../../models/product/ProductCommentReply');
-const ProductMedia = require('../../../models/product/ProductMedia');
+const Product = require('../../../models/product/Product')
+const ProductComment = require('../../../models/product/ProductComment')
+const ProductCommentReply = require('../../../models/product/ProductCommentReply')
+const ProductMedia = require('../../../models/product/ProductMedia')
 
-const Bundle = require('../../../models/bundle/Bundle');
-const BundleComment = require('../../../models/bundle/BundleComment');
-const BundleCommentReply = require('../../../models/bundle/BundleCommentReply');
+const Bundle = require('../../../models/bundle/Bundle')
+const BundleComment = require('../../../models/bundle/BundleComment')
+const BundleCommentReply = require('../../../models/bundle/BundleCommentReply')
 
 module.exports = {
   products: async (req, res) => {
@@ -19,10 +19,10 @@ module.exports = {
         model: ProductMedia,
       })
       .then((products) => {
-        return res.status(200).send(products);
+        return res.status(200).send(products)
       })
       .catch((err) => {
-        console.log(err);
-      });
-  }
+        console.log(err)
+      })
+  },
 }

@@ -1,39 +1,39 @@
-const Product = require('../models/product/Product');
-const ProductComment = require('../models/product/ProductComment');
-const ProductCommentReply = require('../models/product/ProductCommentReply');
-const ProductMedia = require('../models/product/ProductMedia');
-const Reseller = require('../models/reseller/Reseller');
-const ResellerProfileImage = require('../models/reseller/ResellerProfileImage');
-const Customer = require('../models/customer/Customer');
-const CustomerProfileImage = require('../models/customer/CustomerProfileImage');
-const Category = require('../models/category/Category');
-const CategoryMedia = require('../models/category/CategoryMedia');
-const Tag = require('../models/tag/Tag');
+const Product = require('../models/product/Product')
+const ProductComment = require('../models/product/ProductComment')
+const ProductCommentReply = require('../models/product/ProductCommentReply')
+const ProductMedia = require('../models/product/ProductMedia')
+const Reseller = require('../models/reseller/Reseller')
+const ResellerProfileImage = require('../models/reseller/ResellerProfileImage')
+const Customer = require('../models/customer/Customer')
+const CustomerProfileImage = require('../models/customer/CustomerProfileImage')
+const Category = require('../models/category/Category')
+const CategoryMedia = require('../models/category/CategoryMedia')
+const Tag = require('../models/tag/Tag')
 
 module.exports = {
   index: async (req, res) => {
-    let productsList = [];
+    let productsList = []
 
-    const page = parseInt(req.query.page);
-    const limit = parseInt(req.query.limit);
+    const page = parseInt(req.query.page)
+    const limit = parseInt(req.query.limit)
 
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
+    const startIndex = (page - 1) * limit
+    const endIndex = page * limit
 
-    const results = {};
+    const results = {}
 
     if (endIndex < (await Product.countDocuments().exec())) {
       results.next = {
         page: page + 1,
         limit: limit,
-      };
+      }
     }
 
     if (startIndex > 0) {
       results.previous = {
         page: page - 1,
         limit: limit,
-      };
+      }
     }
 
     try {
@@ -46,15 +46,15 @@ module.exports = {
           path: 'media',
           model: ProductMedia,
         })
-        .exec();
-      return res.status(200).send(results);
+        .exec()
+      return res.status(200).send(results)
     } catch (err) {
-      console.error(err);
+      console.error(err)
     }
   },
 
   navbarAll: (req, res) => {
-    let productsList = [];
+    let productsList = []
     Product.find()
       .limit(18)
       .then((products) => {
@@ -62,27 +62,27 @@ module.exports = {
           productsList.push({
             slug: product.slug,
             productName: product.productName,
-          });
-        });
-        res.json(productsList);
+          })
+        })
+        res.json(productsList)
       })
       .catch((err) => {
-        console.log(err);
-      });
+        console.log(err)
+      })
   },
 
   navbarCategory: async (req, res) => {
-    const { category: categoryId } = req.params;
+    const { category: categoryId } = req.params
 
-    console.log('categoryId:', categoryId);
+    console.log('categoryId:', categoryId)
 
     const categoryObj = await Category.findOne({
       _id: categoryId,
-    });
+    })
 
-    console.log('categoriesObj:', categoryObj);
+    console.log('categoriesObj:', categoryObj)
 
-    let productsList = [];
+    let productsList = []
     Product.find({
       'deletion.isDeleted': false,
       'organization.categories': categoryObj._id,
@@ -93,18 +93,18 @@ module.exports = {
           productsList.push({
             slug: product.slug,
             productName: product.productName,
-          });
-        });
-        return res.json(productsList);
+          })
+        })
+        return res.json(productsList)
       })
       .catch((err) => {
-        console.log(err);
-      });
+        console.log(err)
+      })
   },
 
   getProductBySlug: (req, res) => {
-    const { slug } = req.params;
-    console.log('slug product:', slug);
+    const { slug } = req.params
+    console.log('slug product:', slug)
     Product.findOne({
       slug,
       'deletion.isDeleted': false,
@@ -130,27 +130,35 @@ module.exports = {
         model: Tag,
       })
       .then((product) => {
-        console.log('product found:', product);
-        const variantsValues = [];
-        for (let i = 0; i < product.variants.variantsOptionNames.length; i += 1) {
-          variantsValues.push([]);
+        console.log('product found:', product)
+        const variantsValues = []
+        for (
+          let i = 0;
+          i < product.variants.variantsOptionNames.length;
+          i += 1
+        ) {
+          variantsValues.push([])
         }
         product.variants.variantsOptionNames.map((name, index) => {
           product.variants.values.map((value) => {
             if (value.active) {
-              variantsValues[index].push(value.variantValues[index]);
+              variantsValues[index].push(value.variantValues[index])
             }
-          });
-        });
-        const uniqueVariantValues = [];
-        for (let i = 0; i < product.variants.variantsOptionNames.length; i += 1) {
-          uniqueVariantValues.push([]);
+          })
+        })
+        const uniqueVariantValues = []
+        for (
+          let i = 0;
+          i < product.variants.variantsOptionNames.length;
+          i += 1
+        ) {
+          uniqueVariantValues.push([])
         }
         variantsValues.map((valueArray, index) => {
           uniqueVariantValues[index] = valueArray.filter(
-            (v, i, a) => a.indexOf(v) === i
-          );
-        });
+            (v, i, a) => a.indexOf(v) === i,
+          )
+        })
         res.json({
           prices: {
             price: product.prices.price,
@@ -203,17 +211,17 @@ module.exports = {
           description: product.description,
           extraInfo: product.extraInfo,
           _id: product._id,
-        });
+        })
       })
       .catch((err) => {
-        console.log(err);
-      });
+        console.log(err)
+      })
   },
 
   getComments: async (req, res) => {
-    const { productId } = req.params;
+    const { productId } = req.params
 
-    let commentsList = [];
+    let commentsList = []
 
     ProductComment.find({
       product: productId,
@@ -231,7 +239,7 @@ module.exports = {
       })
       .then((comments) => {
         comments.map((comment) => {
-          console.log('comment product:', comment.customer.names.firstName);
+          console.log('comment product:', comment.customer.names.firstName)
           commentsList.push({
             replies: comment.replies,
             updatedOn: comment.updatedOn,
@@ -250,48 +258,48 @@ module.exports = {
             createdOn: comment.createdOn,
             likes: comment.likes,
             dislikes: comment.dislikes,
-          });
-        });
-        return res.json(commentsList);
+          })
+        })
+        return res.json(commentsList)
       })
       .catch((err) => {
-        console.log(err);
-      });
+        console.log(err)
+      })
   },
 
   getCategories: async (req, res) => {
-    let categoriesList = [];
+    let categoriesList = []
     Product.distinct('organization.categories', async (error, results) => {
       const categories = await Category.find({
         _id: results,
-      });
+      })
       categories.map((category) => {
         categoriesList.push({
           id: category._id,
           categoryName: category.categoryName,
           slug: category.slug,
-        });
-      });
-      return res.status(200).send(categoriesList);
-    });
+        })
+      })
+      return res.status(200).send(categoriesList)
+    })
   },
 
   getProductsCategory: async (req, res) => {
-    const { category } = req.params;
+    const { category } = req.params
     const categoryObj = await Category.findOne({
       slug: category,
-    });
+    })
 
-    console.log('category:', category);
-    console.log('categoryObj:', categoryObj);
+    console.log('category:', category)
+    console.log('categoryObj:', categoryObj)
 
-    const page = parseInt(req.query.page);
-    const limit = parseInt(req.query.limit);
+    const page = parseInt(req.query.page)
+    const limit = parseInt(req.query.limit)
 
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
+    const startIndex = (page - 1) * limit
+    const endIndex = page * limit
 
-    const results = {};
+    const results = {}
 
     // const productTestObj = await Product.find({
     //   'organization.categories'
@@ -303,8 +311,8 @@ module.exports = {
         'organization.categories': categoryObj,
       })
         .countDocuments()
-        .exec()
-    );
+        .exec(),
+    )
 
     if (
       endIndex <
@@ -317,14 +325,14 @@ module.exports = {
       results.next = {
         page: page + 1,
         limit: limit,
-      };
+      }
     }
 
     if (startIndex > 0) {
       results.previous = {
         page: page - 1,
         limit: limit,
-      };
+      }
     }
 
     try {
@@ -337,26 +345,26 @@ module.exports = {
           path: 'media',
           model: ProductMedia,
         })
-        .exec();
-      return res.status(200).send(results);
+        .exec()
+      return res.status(200).send(results)
     } catch (err) {
-      console.error(err);
+      console.error(err)
     }
   },
 
   getProductsTag: async (req, res) => {
-    const { tag } = req.params;
+    const { tag } = req.params
     const tagObj = await Tag.findOne({
       slug: tag,
-    });
+    })
 
-    const page = parseInt(req.query.page);
-    const limit = parseInt(req.query.limit);
+    const page = parseInt(req.query.page)
+    const limit = parseInt(req.query.limit)
 
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
+    const startIndex = (page - 1) * limit
+    const endIndex = page * limit
 
-    const results = {};
+    const results = {}
 
     if (
       endIndex <
@@ -369,14 +377,14 @@ module.exports = {
       results.next = {
         page: page + 1,
         limit: limit,
-      };
+      }
     }
 
     if (startIndex > 0) {
       results.previous = {
         page: page - 1,
         limit: limit,
-      };
+      }
     }
 
     try {
@@ -389,25 +397,25 @@ module.exports = {
           path: 'media',
           model: ProductMedia,
         })
-        .exec();
-      console.log('products result:', results);
-      return res.status(200).send(results);
+        .exec()
+      console.log('products result:', results)
+      return res.status(200).send(results)
     } catch (err) {
-      console.error(err);
+      console.error(err)
     }
   },
 
   updateHowManyViewed: async (req, res) => {
-    const { slug } = req.body;
+    const { slug } = req.body
 
-    console.log('how many viewed slug:', slug);
+    console.log('how many viewed slug:', slug)
 
     try {
       const product = await Product.findOne({
         slug,
-      });
+      })
 
-      const howManyViewedNumber = await product.howManyViewed;
+      const howManyViewedNumber = await product.howManyViewed
 
       await Product.updateOne(
         {
@@ -418,11 +426,13 @@ module.exports = {
         },
         {
           runValidators: true,
-        }
-      );
-      return res.status(200).send({ howManyViewedNumber: howManyViewedNumber + 1 });
+        },
+      )
+      return res
+        .status(200)
+        .send({ howManyViewedNumber: howManyViewedNumber + 1 })
     } catch (err) {
-      console.log(err);
+      console.log(err)
     }
-  }
+  },
 }
