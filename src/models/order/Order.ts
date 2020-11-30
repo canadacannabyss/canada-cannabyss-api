@@ -145,7 +145,7 @@ const OrderSchema = new mongoose.Schema({
       required: false,
     },
   },
-  createdOn: {
+  createdAt: {
     type: Date,
     required: false,
     default: Date.now(),

@@ -35,4 +35,4 @@ router.put('/update/:id', updateBundle)
 
 router.put('/delete/bundle/:bundleId', deleteBundle)
 
-module.exports = router
+export default router

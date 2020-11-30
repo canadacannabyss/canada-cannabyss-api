@@ -31,7 +31,7 @@ module.exports = {
       })
     } else {
       const id = uuidv4()
-      const createdOn = Date.now()
+      const createdAt = Date.now()
       const updatedOn = null
       let commentObj
       let commentId
@@ -40,7 +40,7 @@ module.exports = {
         customer: userId,
         product: productId,
         content,
-        createdOn,
+        createdAt,
         updatedOn,
         stars: stars,
         likes: 0,
@@ -77,7 +77,7 @@ module.exports = {
             model: Product,
           })
           .sort({
-            createdOn: '-1',
+            createdAt: '-1',
           })
 
         console.log('commentsArray:', commentsArray)
@@ -112,7 +112,7 @@ module.exports = {
       })
     } else {
       const id = uuidv4()
-      const createdOn = Date.now()
+      const createdAt = Date.now()
       const updatedOn = null
       let commentObj
       let commentId
@@ -121,7 +121,7 @@ module.exports = {
         customer: userId,
         bundle: bundleId,
         content,
-        createdOn,
+        createdAt,
         updatedOn,
         stars: stars,
         likes: 0,
@@ -158,7 +158,7 @@ module.exports = {
             model: Bundle,
           })
           .sort({
-            createdOn: '-1',
+            createdAt: '-1',
           })
 
         console.log('commentsArray:', commentsArray)
@@ -191,7 +191,7 @@ module.exports = {
       })
     } else {
       const id = uuidv4()
-      const createdOn = Date.now()
+      const createdAt = Date.now()
       const updatedOn = null
       let commentIdVar
       const newCommentReply = new CommentReply({
@@ -200,7 +200,7 @@ module.exports = {
         product: productId,
         comment: commentId,
         content,
-        createdOn,
+        createdAt,
         updatedOn,
         likes: 0,
         dislikes: 0,

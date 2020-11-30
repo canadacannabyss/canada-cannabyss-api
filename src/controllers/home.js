@@ -148,7 +148,7 @@ module.exports = {
         model: CategoryMedia,
       })
       .sort({
-        createdOn: -1,
+        createdAt: -1,
       })
       .limit(8)
       .then((categories) => {
@@ -170,7 +170,7 @@ module.exports = {
       })
       .limit(4)
       .sort({
-        createdOn: -1,
+        createdAt: -1,
       })
       .then((products) => {
         products.map((product) => {
@@ -229,7 +229,7 @@ module.exports = {
         },
       })
       .sort({
-        createdOn: '-1',
+        createdAt: '-1',
       })
       .then((comments) => {
         comments.map((comment) => {
@@ -245,7 +245,7 @@ module.exports = {
               },
             },
             content: comment.content,
-            createdOn: comment.createdOn,
+            createdAt: comment.createdAt,
             likes: comment.likes,
             dislikes: comment.dislikes,
           })

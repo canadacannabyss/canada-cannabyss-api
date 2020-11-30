@@ -46,4 +46,4 @@ router.delete('/delete/category/:categoryId', deleteCategory)
 // Delete Category Cover
 router.delete('/delete/media/:id', deleteMedia)
 
-module.exports = router
+export default router

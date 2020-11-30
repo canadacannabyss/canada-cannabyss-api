@@ -33,7 +33,7 @@ const BundleCommentReplySchema = new mongoose.Schema({
     type: Number,
     required: false,
   },
-  createdOn: {
+  createdAt: {
     type: Date,
     default: Date.now,
   },

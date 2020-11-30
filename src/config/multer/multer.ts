@@ -8,9 +8,10 @@ import multerS3 from 'multer-sharp-s3'
 const storageTypes = {
   local: multer.diskStorage({
     destination: (req: Request, file, cb) => {
-      cb(null, path.resolve(__dirname, '..', 'tmp', 'uploads'))
+      cb(null, path.resolve(__dirname, '..', '..', 'uploads'))
     },
     filename: (req, file, cb) => {
+      console.log('multer request authorization:', req.headers.authorization)
       crypto.randomBytes(16, (err, hash) => {
         if (err) cb(err)
 
@@ -25,9 +26,13 @@ const storageTypes = {
       crypto.randomBytes(16, (err, hash) => {
         if (err) cb(err)
 
-        const fileName = `${req.session.destination}/${hash.toString('hex')}-${
-          file.originalname
-        }`
+        console.log(
+          'AWS S3 multer request authorization:',
+          req.headers.authorization,
+        )
+        const fileName = `${req.headers.authorization}/${hash.toString(
+          'hex',
+        )}-${file.originalname}`
 
         cb(null, fileName)
       })
@@ -46,6 +51,7 @@ const storageTypes = {
 export default {
   dest: path.resolve(__dirname, '..', 'tmp', 'uploads'),
   storage: storageTypes[process.env.STORAGE_TYPE],
+  // storage: storageTypes['local'],
   limits: {
     fileSize: 150 * 1024 * 1024,
   },

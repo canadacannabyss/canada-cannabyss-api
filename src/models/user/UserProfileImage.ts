@@ -14,7 +14,7 @@ const UserProfileImageSchema = new mongoose.Schema({
   key: String,
   url: String,
   origin: String,
-  createdOn: {
+  createdAt: {
     type: Date,
     default: Date.now,
   },

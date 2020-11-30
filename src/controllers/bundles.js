@@ -1,36 +1,36 @@
-const Product = require('../models/product/Product');
-const ProductMedia = require('../models/product/ProductMedia');
-const Bundle = require('../models/bundle/Bundle');
-const BundleComment = require('../models/bundle/BundleComment');
-const Reseller = require('../models/reseller/Reseller');
-const ResellerProfileImage = require('../models/reseller/ResellerProfileImage');
-const Customer = require('../models/customer/Customer');
-const CustomerProfileImage = require('../models/customer/CustomerProfileImage');
-const Category = require('../models/category/Category');
-const Tag = require('../models/tag/Tag');
+const Product = require('../models/product/Product')
+const ProductMedia = require('../models/product/ProductMedia')
+const Bundle = require('../models/bundle/Bundle')
+const BundleComment = require('../models/bundle/BundleComment')
+const Reseller = require('../models/reseller/Reseller')
+const ResellerProfileImage = require('../models/reseller/ResellerProfileImage')
+const Customer = require('../models/customer/Customer')
+const CustomerProfileImage = require('../models/customer/CustomerProfileImage')
+const Category = require('../models/category/Category')
+const Tag = require('../models/tag/Tag')
 
 module.exports = {
   index: async (req, res) => {
-    const page = parseInt(req.query.page);
-    const limit = parseInt(req.query.limit);
+    const page = parseInt(req.query.page)
+    const limit = parseInt(req.query.limit)
 
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
+    const startIndex = (page - 1) * limit
+    const endIndex = page * limit
 
-    const results = {};
+    const results = {}
 
     if (endIndex < (await Bundle.countDocuments().exec())) {
       results.next = {
         page: page + 1,
         limit: limit,
-      };
+      }
     }
 
     if (startIndex > 0) {
       results.previous = {
         page: page - 1,
         limit: limit,
-      };
+      }
     }
 
     try {
@@ -47,15 +47,15 @@ module.exports = {
             model: ProductMedia,
           },
         })
-        .exec();
-      return res.status(200).send(results);
+        .exec()
+      return res.status(200).send(results)
     } catch (err) {
-      console.error(err);
+      console.error(err)
     }
   },
 
   navbarAll: (req, res) => {
-    let bundlesList = [];
+    let bundlesList = []
     Bundle.find()
       .limit(18)
       .then((bundles) => {
@@ -63,22 +63,22 @@ module.exports = {
           bundlesList.push({
             slug: bundle.slug,
             bundleName: bundle.bundleName,
-          });
-        });
-        return res.json(bundlesList);
+          })
+        })
+        return res.json(bundlesList)
       })
       .catch((err) => {
-        console.log(err);
-      });
+        console.log(err)
+      })
   },
   navbarCategory: async (req, res) => {
-    const { category: categoryId } = req.params;
+    const { category: categoryId } = req.params
 
     const categoryObj = await Category.findOne({
       _id: categoryId,
-    });
+    })
 
-    let bundlesList = [];
+    let bundlesList = []
     Bundle.find({
       'organization.categories': categoryObj._id,
     })
@@ -88,18 +88,18 @@ module.exports = {
           bundlesList.push({
             slug: bundle.slug,
             bundleName: bundle.bundleName,
-          });
-        });
-        return res.json(bundlesList);
+          })
+        })
+        return res.json(bundlesList)
       })
       .catch((err) => {
-        console.log(err);
-      });
+        console.log(err)
+      })
   },
 
   getBundleSlug: (req, res) => {
-    const { slug } = req.params;
-    console.log('slug product:', slug);
+    const { slug } = req.params
+    console.log('slug product:', slug)
     Bundle.findOne({
       slug,
     })
@@ -128,17 +128,17 @@ module.exports = {
         model: Tag,
       })
       .then((product) => {
-        return res.json(product);
+        return res.json(product)
       })
       .catch((err) => {
-        console.log(err);
-      });
+        console.log(err)
+      })
   },
 
   getComment: async (req, res) => {
-    const { bundleId } = req.params;
+    const { bundleId } = req.params
 
-    let commentsList = [];
+    let commentsList = []
 
     BundleComment.find({
       bundle: bundleId,
@@ -152,11 +152,11 @@ module.exports = {
         },
       })
       .sort({
-        createdOn: '-1',
+        createdAt: '-1',
       })
       .then((comments) => {
         comments.map((comment) => {
-          console.log('comment bundle:', comment);
+          console.log('comment bundle:', comment)
           commentsList.push({
             replies: comment.replies,
             updatedOn: comment.updatedOn,
@@ -172,48 +172,48 @@ module.exports = {
               },
             },
             content: comment.content,
-            createdOn: comment.createdOn,
+            createdAt: comment.createdAt,
             likes: comment.likes,
             dislikes: comment.dislikes,
-          });
-        });
-        return res.json(commentsList);
+          })
+        })
+        return res.json(commentsList)
       })
       .catch((err) => {
-        console.log(err);
-      });
+        console.log(err)
+      })
   },
 
   getCategories: async (req, res) => {
-    let categoriesList = [];
+    let categoriesList = []
     Bundle.distinct('organization.categories', async (error, results) => {
       const categories = await Category.find({
         _id: results,
-      });
+      })
       categories.map((category) => {
         categoriesList.push({
           id: category._id,
           categoryName: category.categoryName,
           slug: category.slug,
-        });
-      });
-      return res.status(200).send(categoriesList);
-    });
+        })
+      })
+      return res.status(200).send(categoriesList)
+    })
   },
 
   getBundlesCategory: async (req, res) => {
-    const { category } = req.params;
+    const { category } = req.params
     const categoryObj = await Category.findOne({
       slug: category,
-    });
+    })
 
-    const page = parseInt(req.query.page);
-    const limit = parseInt(req.query.limit);
+    const page = parseInt(req.query.page)
+    const limit = parseInt(req.query.limit)
 
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
+    const startIndex = (page - 1) * limit
+    const endIndex = page * limit
 
-    const results = {};
+    const results = {}
 
     if (
       endIndex <
@@ -226,14 +226,14 @@ module.exports = {
       results.next = {
         page: page + 1,
         limit: limit,
-      };
+      }
     }
 
     if (startIndex > 0) {
       results.previous = {
         page: page - 1,
         limit: limit,
-      };
+      }
     }
 
     try {
@@ -250,22 +250,22 @@ module.exports = {
             model: ProductMedia,
           },
         })
-        .exec();
-      return res.status(200).send(results);
+        .exec()
+      return res.status(200).send(results)
     } catch (err) {
-      console.error(err);
+      console.error(err)
     }
   },
 
   updateHowManyViewed: async (req, res) => {
-    const { slug } = req.body;
+    const { slug } = req.body
 
     try {
       const bundle = await Bundle.findOne({
         slug,
-      });
+      })
 
-      const howManyViewedNumber = await bundle.howManyViewed;
+      const howManyViewedNumber = await bundle.howManyViewed
 
       await Bundle.updateOne(
         {
@@ -276,11 +276,13 @@ module.exports = {
         },
         {
           runValidators: true,
-        }
-      );
-      return res.status(200).send({ howManyViewedNumber: howManyViewedNumber + 1 });
+        },
+      )
+      return res
+        .status(200)
+        .send({ howManyViewedNumber: howManyViewedNumber + 1 })
     } catch (err) {
-      console.log(err);
+      console.log(err)
     }
-  }
+  },
 }

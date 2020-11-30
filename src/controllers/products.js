@@ -235,7 +235,7 @@ module.exports = {
         },
       })
       .sort({
-        createdOn: '-1',
+        createdAt: '-1',
       })
       .then((comments) => {
         comments.map((comment) => {
@@ -255,7 +255,7 @@ module.exports = {
               },
             },
             content: comment.content,
-            createdOn: comment.createdOn,
+            createdAt: comment.createdAt,
             likes: comment.likes,
             dislikes: comment.dislikes,
           })

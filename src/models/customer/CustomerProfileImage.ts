@@ -24,7 +24,7 @@ const CustomerProfileImageSchema = new mongoose.Schema({
       required: false,
     },
   },
-  createdOn: {
+  createdAt: {
     type: Date,
     default: Date.now,
   },

@@ -30,7 +30,7 @@ const verifyValidSlug = async (slug) => {
 export function index(req: Request, res: Response) {
   Category.find()
     .sort({
-      createdOn: -1,
+      createdAt: -1,
     })
     .then((categories) => {
       return res.json(categories)

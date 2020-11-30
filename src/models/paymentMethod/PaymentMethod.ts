@@ -81,7 +81,7 @@ const PaymentMethodSchema = new mongoose.Schema({
       required: false,
     },
   },
-  createdOn: {
+  createdAt: {
     type: Date,
     required: true,
     default: Date.now(),

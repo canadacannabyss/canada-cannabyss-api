@@ -16,7 +16,7 @@ const TemporaryResellerSchema = new mongoose.Schema({
     ref: 'Admin',
     required: true,
   },
-  createdOn: {
+  createdAt: {
     type: Date,
     default: Date.now,
   },

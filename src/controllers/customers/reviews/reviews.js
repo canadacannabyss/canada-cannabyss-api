@@ -1,17 +1,17 @@
-const Product = require('../../../models/product/Product');
-const ProductComment = require('../../../models/product/ProductComment');
-const Bundle = require('../../../models/bundle/Bundle');
-const BundleComment = require('../../../models/bundle/BundleComment');
-const Customer = require('../../../models/customer/Customer');
-const CustomerProfileImage = require('../../../models/customer/CustomerProfileImage');
+const Product = require('../../../models/product/Product')
+const ProductComment = require('../../../models/product/ProductComment')
+const Bundle = require('../../../models/bundle/Bundle')
+const BundleComment = require('../../../models/bundle/BundleComment')
+const Customer = require('../../../models/customer/Customer')
+const CustomerProfileImage = require('../../../models/customer/CustomerProfileImage')
 
 module.exports = {
   getAllReviewsByUser: async (req, res) => {
-    const { userId } = req.params;
+    const { userId } = req.params
 
-    const commentsList = [];
-    const commentsProductList = [];
-    const commentsBundleList = [];
+    const commentsList = []
+    const commentsProductList = []
+    const commentsBundleList = []
 
     try {
       const commentsProductObj = await ProductComment.find({
@@ -28,7 +28,7 @@ module.exports = {
         .populate({
           path: 'product',
           model: Product,
-        });
+        })
 
       commentsProductObj.map((comment) => {
         commentsProductList.push({
@@ -46,10 +46,10 @@ module.exports = {
             productName: comment.product.productName,
             slug: comment.product.slug,
           },
-          createdOn: comment.createdOn,
+          createdAt: comment.createdAt,
           content: comment.content,
-        });
-      });
+        })
+      })
 
       const commentsBundleObj = await BundleComment.find({
         customer: userId,
@@ -65,7 +65,7 @@ module.exports = {
         .populate({
           path: 'bundle',
           model: Bundle,
-        });
+        })
 
       commentsBundleObj.map((comment) => {
         commentsBundleList.push({
@@ -83,19 +83,19 @@ module.exports = {
             bundleName: comment.bundle.bundleName,
             slug: comment.bundle.slug,
           },
-          createdOn: comment.createdOn,
+          createdAt: comment.createdAt,
           content: comment.content,
-        });
-      });
+        })
+      })
 
       const resultObj = {
         commentsProduct: commentsProductList,
         commentsBundle: commentsBundleList,
-      };
+      }
 
-      return res.status(200).send(resultObj);
+      return res.status(200).send(resultObj)
     } catch (err) {
-      console.error(err);
+      console.error(err)
     }
-  }
+  },
 }
