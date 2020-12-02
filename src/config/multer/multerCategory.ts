@@ -25,9 +25,9 @@ const storageTypes = {
       crypto.randomBytes(16, (err, hash) => {
         if (err) cb(err)
 
-        const fileName = `${req.session.destination}/${hash.toString('hex')}-${
-          file.originalname
-        }`
+        const fileName = `${req.headers.authorization}/${hash.toString(
+          'hex',
+        )}-${file.originalname}`
 
         cb(null, fileName)
       })
@@ -45,7 +45,8 @@ const storageTypes = {
 
 export default {
   dest: path.resolve(__dirname, '..', 'tmp', 'uploads'),
-  storage: storageTypes[process.env.STORAGE_TYPE],
+  // storage: storageTypes[process.env.STORAGE_TYPE],
+  storage: storageTypes['local'],
   limits: {
     fileSize: 150 * 1024 * 1024,
   },

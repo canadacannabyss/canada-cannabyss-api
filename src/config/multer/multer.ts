@@ -26,10 +26,8 @@ const storageTypes = {
       crypto.randomBytes(16, (err, hash) => {
         if (err) cb(err)
 
-        console.log(
-          'AWS S3 multer request authorization:',
-          req.headers.authorization,
-        )
+        console.log('req.headers.authorization:', req.headers.authorization)
+
         const fileName = `${req.headers.authorization}/${hash.toString(
           'hex',
         )}-${file.originalname}`

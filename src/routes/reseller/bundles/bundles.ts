@@ -1,24 +1,29 @@
 import { Router } from 'express'
-import multer from 'multer'
 
-import multerConfig from '../config/multer/multerPromotion'
+import multer from 'multer'
+import multerConfig from '../../../config/multer/multer'
+
 import {
   create,
+  deleteMedia,
+  getBySlug,
   index,
   oldDelete,
+  panelGetBySlug,
   setGlobalVariable,
   update,
-  validateSlug,
   uploadMedia,
-  getBySlug,
-  oldDeleteMedia,
-} from '../controllers/promotions'
+  validateSlug,
+  deleteBundle,
+} from '../../../controllers/reseller/bundles/bundles'
 
 const router = Router()
 
-router.get('/get/all', index)
+router.get('', index)
 
-router.get('/get/slug/:slug', getBySlug)
+router.get('/panel/get/:slug', panelGetBySlug)
+
+router.get('/:slug', getBySlug)
 
 router.get('/validation/slug/:slug', validateSlug)
 
@@ -32,6 +37,8 @@ router.put('/update/:id', update)
 
 router.delete('/delete/:id', oldDelete)
 
-router.delete('/delete/cover/:id', oldDeleteMedia)
+router.delete('/delete/bundle/:bundleId', deleteBundle)
+
+router.delete('/delete/cover/:id', deleteMedia)
 
 export default router
