@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { v4 } from 'uuid/v4'
+import { v4 } from 'uuid'
 import _ from 'lodash'
 
 import { slugifyString, generateRandomSlug } from '../../../utils/strings/slug'

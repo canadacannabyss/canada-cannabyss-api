@@ -78,7 +78,7 @@ export default (app: Application): void => {
   app.use('/admin/coupons', adminCoupons)
   app.use('/admin/postal-services', adminPostalServices)
 
-  app.use('/reseller', resellers)
+  app.use('/reseller', reseller)
   app.use('/reseller/products', resellersProducts)
   app.use('/reseller/bundles', resellersBundles)
   app.use('/reseller/promotions', resellersPromotions)

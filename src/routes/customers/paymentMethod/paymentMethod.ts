@@ -33,4 +33,4 @@ router.put('/cryptocurrency/set/order', async (req, res) => {
   const { orderId, paymentMethodId } = req.body
 })
 
-module.exports = router
+export default router

@@ -76,6 +76,7 @@ export async function panelGetAllBanners(req: Request, res: Response) {
       },
     })
     .then((banners) => {
+      console.log('banners:', banners)
       return res.status(200).send(banners)
     })
     .catch((err) => {

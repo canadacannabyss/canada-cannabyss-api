@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { v4 } from 'uuid/v4'
+import { v4 } from 'uuid'
 import slugify from 'slugify'
 import _ from 'lodash'
 

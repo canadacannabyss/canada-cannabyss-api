@@ -41,8 +41,8 @@ const storageTypes = {
 
 export default {
   dest: path.resolve(__dirname, '..', 'tmp', 'uploads'),
-  // storage: storageTypes[process.env.STORAGE_TYPE],
-  storage: storageTypes['local'],
+  storage: storageTypes[process.env.STORAGE_TYPE],
+  // storage: storageTypes['local'],
   limits: {
     fileSize: 150 * 1024 * 1024,
   },
