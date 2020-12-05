@@ -358,19 +358,35 @@ export async function updateShippingHandling(req: Request, res: Response) {
           },
         )
       } else {
-        await Order.findOneAndUpdate(
-          {
-            _id: orderId,
-          },
-          {
-            'shipping.shippingHandling': 8.99,
-            'shipping.freeShippingApplied': false,
-            updatedOn: Date.now(),
-          },
-          {
-            runValidators: true,
-          },
-        )
+        if (orderObj.subtotal >= 100) {
+          await Order.findOneAndUpdate(
+            {
+              _id: orderId,
+            },
+            {
+              'shipping.shippingHandling': 0,
+              'shipping.freeShippingApplied': true,
+              updatedOn: Date.now(),
+            },
+            {
+              runValidators: true,
+            },
+          )
+        } else {
+          await Order.findOneAndUpdate(
+            {
+              _id: orderId,
+            },
+            {
+              'shipping.shippingHandling': 15.0,
+              'shipping.freeShippingApplied': false,
+              updatedOn: Date.now(),
+            },
+            {
+              runValidators: true,
+            },
+          )
+        }
       }
     } else {
       await Order.findOneAndUpdate(
@@ -378,7 +394,7 @@ export async function updateShippingHandling(req: Request, res: Response) {
           _id: orderId,
         },
         {
-          'shipping.shippingHandling': 8.99,
+          'shipping.shippingHandling': 15.0,
           'shipping.freeShippingApplied': false,
           updatedOn: Date.now(),
         },
