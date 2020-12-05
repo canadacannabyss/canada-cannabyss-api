@@ -6,7 +6,8 @@ class GstHst {
   }
 
   calculateGstHst() {
-    return this.subtotal * 0.05
+    // return this.subtotal * 0.05
+    return this.subtotal * 0
   }
 }
 
