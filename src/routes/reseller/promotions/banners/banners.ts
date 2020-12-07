@@ -23,7 +23,7 @@ router.post('/publish', create)
 
 router.post('/set/global-variable', setGlobalVariable)
 
-router.delete('/delete/banner/:bannerId', deleteBanner)
+router.put('/delete/banner/:bannerId', deleteBanner)
 
 router.put('/update/:id', update)
 

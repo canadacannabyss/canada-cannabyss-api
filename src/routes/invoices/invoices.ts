@@ -63,4 +63,4 @@ router.post('/create', async (req, res) => {
 
 router.post('/publish', multer(multerConfig).single('file'), (req, res) => {})
 
-module.exports = router
+export default router

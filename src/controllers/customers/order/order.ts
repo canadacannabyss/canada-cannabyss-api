@@ -16,6 +16,7 @@ import PaymentReceipt from '../../../models/paymentReceipt/PaymentReceipt'
 import Customer from '../../../models/customer/Customer'
 import PostalService from '../../../models/postalService/postalService'
 import PstRst from '../../../utils/taxes/pstRst'
+import { post } from '../../../services/api/index'
 
 const roundFloatNumber = (number) => {
   return Math.round((number + Number.EPSILON) * 100) / 100
@@ -270,6 +271,13 @@ export async function couponApply(req: Request, res: Response) {
       _id: orderId,
     })
 
+    const alreadyAppliedCouponOrder = await Order.findOne({
+      customer: order.customer,
+      coupon: {
+        _id: coupon._id,
+      },
+    })
+
     const errors = []
 
     if (!coupon) {
@@ -279,7 +287,7 @@ export async function couponApply(req: Request, res: Response) {
     } else {
       if (coupon.quantity === 0) {
         errors.push({
-          error: 'This coupon is inavailable.',
+          error: 'This coupon is unavailable.',
         })
       }
     }
@@ -289,6 +297,14 @@ export async function couponApply(req: Request, res: Response) {
         error: 'Order does not exist.',
       })
     }
+
+    if (alreadyAppliedCouponOrder) {
+      errors.push({
+        error: 'This coupon has already been applied.',
+      })
+    }
+
+    console.log('errors:', errors)
 
     if (errors.length > 0) {
       res.status(404).send(errors)
@@ -841,6 +857,26 @@ export async function updateCompleted(req: Request, res: Response) {
     })
 
     const resultsAsyncHowManyBought = await Promise.all(promisesHowManyBought)
+
+    const customerOrders = await Order.find({
+      customer: order.customer,
+      completed: true,
+      paid: true,
+    })
+
+    console.log('customerOrders:', customerOrders)
+
+    console.log('customerOrders.length === 0:', customerOrders.length === 0)
+
+    if (customerOrders.length === 0) {
+      const addCreditToCustomerResponse = await post(
+        `${process.env.USER_API_DOMAIN}/referral/customer/add/credit/on/buy`,
+        {
+          customerId: order.customer,
+        },
+      )
+      console.log('addCreditToCustomerResponse:', addCreditToCustomerResponse)
+    }
 
     return res.status(200).send(order.completed)
   } catch (err) {
