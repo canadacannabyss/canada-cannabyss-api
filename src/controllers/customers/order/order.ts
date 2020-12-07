@@ -858,24 +858,24 @@ export async function updateCompleted(req: Request, res: Response) {
 
     const resultsAsyncHowManyBought = await Promise.all(promisesHowManyBought)
 
-    const customerOrders = await Order.find({
-      customer: order.customer,
-      completed: true,
-    })
+    // const customerOrders = await Order.find({
+    //   customer: order.customer,
+    //   completed: true,
+    // })
 
-    console.log('customerOrders:', customerOrders)
+    // console.log('customerOrders:', customerOrders)
 
-    console.log('customerOrders.length === 0:', customerOrders.length === 0)
+    // console.log('customerOrders.length === 0:', customerOrders.length === 0)
 
-    if (customerOrders.length === 0) {
-      const addCreditToCustomerResponse = await post(
-        `${process.env.USER_API_DOMAIN}/referral/customer/add/credit/on/buy`,
-        {
-          customerId: order.customer,
-        },
-      )
-      console.log('addCreditToCustomerResponse:', addCreditToCustomerResponse)
-    }
+    // if (customerOrders.length === 0) {
+    //   const addCreditToCustomerResponse = await post(
+    //     `${process.env.USER_API_DOMAIN}/referral/customer/add/credit/on/buy`,
+    //     {
+    //       customerId: order.customer,
+    //     },
+    //   )
+    //   console.log('addCreditToCustomerResponse:', addCreditToCustomerResponse)
+    // }
 
     return res.status(200).send(order.completed)
   } catch (err) {
