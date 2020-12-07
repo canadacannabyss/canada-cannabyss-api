@@ -861,7 +861,6 @@ export async function updateCompleted(req: Request, res: Response) {
     const customerOrders = await Order.find({
       customer: order.customer,
       completed: true,
-      paid: true,
     })
 
     console.log('customerOrders:', customerOrders)
